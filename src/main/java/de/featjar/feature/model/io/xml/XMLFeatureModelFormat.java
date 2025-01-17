@@ -175,7 +175,7 @@ public class XMLFeatureModelFormat extends AXMLFeatureModelFormat<IFeatureModel,
             featureTree.mutate().setOptional();
         }
         if (nameToIdentifierMap.get(name) != null) {
-            throw new ParseException("Duplicate feature name!");
+            throw new ParseException(String.format("Duplicate feature name \"%s\"!", name));
         }
         nameToIdentifierMap.put(name, feature.getIdentifier());
         return featureTree;
