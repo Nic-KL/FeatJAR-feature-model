@@ -20,6 +20,7 @@
  */
 package de.featjar.feature.model.io;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.base.io.format.AFormats;
 import de.featjar.feature.model.FeatureModel;
 
@@ -28,4 +29,9 @@ import de.featjar.feature.model.FeatureModel;
  *
  * @author Sebastian Krieter
  */
-public class FeatureModelFormats extends AFormats<FeatureModel> {}
+public class FeatureModelFormats extends AFormats<FeatureModel> {
+
+    public static FeatureModelFormats getInstance() {
+        return FeatJAR.extensionPoint(FeatureModelFormats.class);
+    }
+}
