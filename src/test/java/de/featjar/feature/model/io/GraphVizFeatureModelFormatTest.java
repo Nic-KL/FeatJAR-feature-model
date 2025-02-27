@@ -23,14 +23,28 @@ package de.featjar.feature.model.io;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.Common;
+import de.featjar.base.FeatJAR;
 import de.featjar.base.io.IO;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.io.xml.GraphVizFeatureModelFormat;
 import de.featjar.feature.model.io.xml.XMLFeatureModelFormat;
 import java.io.IOException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class GraphVizFeatureModelFormatTest extends Common {
+
+    @BeforeAll
+    public static void begin() {
+        FeatJAR.testConfiguration().initialize();
+    }
+
+    @AfterAll
+    public static void end() {
+        FeatJAR.deinitialize();
+    }
+
     @Test
     public void graphVizFeatureModelFormat() throws IOException {
         IFeatureModel featureModel = load("testFeatureModels/car.xml", new XMLFeatureModelFormat());
