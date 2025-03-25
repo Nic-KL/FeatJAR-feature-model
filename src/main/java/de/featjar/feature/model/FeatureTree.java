@@ -121,6 +121,7 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
         feature = otherFeatureTree.feature;
         groupID = otherFeatureTree.groupID;
         featureRange = otherFeatureTree.featureRange.clone();
+        groups = new ArrayList<>(otherFeatureTree.groups.size());
         otherFeatureTree.groups.stream().map(Group::clone).forEach(groups::add);
         attributeValues = otherFeatureTree.cloneAttributes();
     }
