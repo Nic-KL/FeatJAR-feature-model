@@ -46,7 +46,7 @@ public class Feature extends AFeatureModelElement implements IMutableFeature {
 
     @Override
     public Feature clone(IFeatureModel newFeatureModel) {
-        return new Feature(this);
+        return new Feature(this, newFeatureModel);
     }
 
     @Override

@@ -66,17 +66,31 @@ public class FeatureModel implements IMutableFeatureModel, IMutatableAttributabl
         identifier = otherFeatureModel.getNewIdentifier();
 
         featureTreeRoots = new ArrayList<>(otherFeatureModel.featureTreeRoots.size());
-        otherFeatureModel.featureTreeRoots.stream().forEach(t -> featureTreeRoots.add(Trees.clone(t)));
+
+        LinkedHashMap<IFeature, IFeatureTree> featureTreeMapping =
+                new LinkedHashMap<>((int) (otherFeatureModel.features.size() * 1.5));
+        otherFeatureModel.featureTreeRoots.stream().forEach(t -> {
+            IFeatureTree clonedTree = Trees.clone(t);
+            featureTreeMapping.put(t.getFeature(), clonedTree);
+            featureTreeRoots.add(clonedTree);
+        });
 
         features = new LinkedHashMap<>((int) (otherFeatureModel.features.size() * 1.5));
-        otherFeatureModel.features.entrySet().stream()
-                .map(e -> e.getValue().clone(this))
-                .forEach(f -> features.put(f.getIdentifier(), f));
+        otherFeatureModel.features.entrySet().stream().forEach(e -> {
+            IFeature oldFeature = e.getValue();
+            IFeature newFeature = oldFeature.clone(this);
+            features.put(newFeature.getIdentifier(), newFeature);
+            IFeatureTree newFeatureTreeNode = featureTreeMapping.get(oldFeature);
+            if (newFeatureTreeNode != null) {
+                newFeatureTreeNode.mutate().setFeature(newFeature);
+            }
+        });
 
         constraints = new LinkedHashMap<>((int) (otherFeatureModel.constraints.size() * 1.5));
-        otherFeatureModel.constraints.entrySet().stream()
-                .map(e -> e.getValue().clone(this))
-                .forEach(c -> constraints.put(c.getIdentifier(), c));
+        otherFeatureModel.constraints.entrySet().stream().forEach(e -> {
+            IConstraint newConstraint = e.getValue().clone(this);
+            constraints.put(newConstraint.getIdentifier(), newConstraint);
+        });
 
         attributeValues = otherFeatureModel.cloneAttributes();
     }

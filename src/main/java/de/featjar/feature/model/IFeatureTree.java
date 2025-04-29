@@ -111,6 +111,8 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
 
         void setFeatureRange(Range featureRange);
 
+        void setFeature(IFeature feature);
+
         void addGroup(int lowerBound, int upperBound);
 
         void addGroup(Range groupRange);

@@ -101,7 +101,7 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
         }
     }
 
-    protected final IFeature feature;
+    protected IFeature feature;
 
     protected int groupID;
 
@@ -208,6 +208,11 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     }
 
     @Override
+    public void setFeature(IFeature feature) {
+        this.feature = feature;
+    }
+
+    @Override
     public void addGroup(int lowerBound, int upperBound) {
         groups.add(new Group(lowerBound, upperBound));
     }
@@ -217,11 +222,13 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
         groups.add(new Group(groupRange));
     }
 
+    @Override
     public void setGroups(List<Group> groups) {
         this.groups.clear();
         this.groups.addAll(groups);
     }
 
+    @Override
     public void setGroupID(int groupID) {
         if (parent == null) throw new IllegalArgumentException("Cannot set groupID for root feature!");
         if (groupID < 0) throw new IllegalArgumentException(String.format("groupID must be positive (%d)", groupID));
