@@ -54,7 +54,7 @@ public interface IFeatureModel extends IFeatureModelElement, IHasCommonAttribute
 
     /**
      * {@return a deep clone of the feature model}
-     * Copies all {@link IFeatureTree feature trees},{@link IFeature features},{@link IConstraint constraints}, and {@link IAttribute attributes}.
+     * Copies all {@link IFeatureTree feature trees}, {@link IFeature features}, {@link IConstraint constraints}, and {@link IAttribute attributes}.
      */
     IFeatureModel clone();
 
