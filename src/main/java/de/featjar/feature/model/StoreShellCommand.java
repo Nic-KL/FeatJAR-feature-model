@@ -3,6 +3,7 @@ package de.featjar.feature.model;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class StoreShellCommand extends AbstractShellCommand {	
 	private final Map<String, StoreShellCommand> subCommands = Map.of(
@@ -23,5 +24,10 @@ public class StoreShellCommand extends AbstractShellCommand {
 	public void execute(Path p) {
 		System.out.println("Usage: load <type> <path>");
 	}
+	
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("store");
+    }
 
 }

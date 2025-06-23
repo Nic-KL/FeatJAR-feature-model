@@ -3,7 +3,9 @@ package de.featjar.feature.model;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 
+import de.featjar.base.extension.IExtension;
 import de.featjar.formula.structure.IFormula;
 
 public class LoadShellCommand extends AbstractShellCommand {
@@ -15,53 +17,56 @@ public class LoadShellCommand extends AbstractShellCommand {
 	private static class LoadFeatureModel implements IShellCommand {
 
 		@Override
-		public void execute(ShellContext ctx, String[] args) {
+		public void execute(ShellSession session, String[] args) {
 			String inputString;
-			inputString = ctx.readCommand("Enter a vaild path:\\n$$$");
-			Path path = Paths.get(inputString);
+			inputString = readCommand("Enter a vaild path:\n$$$");
+			Path path = Paths.get(inputString); // TODO Exception, Exit -> globales abort !, auslagern ?
 			
 			IFeatureModel fm = IOShellStuff.loadFeatureModel(path); // TODO catch Exception
-			IOShellStuff.fmList.add(fm);
-			System.out.println(IOShellStuff.fmList.getFirst());
-			
-		}
-		
+			session.fmList.add(fm);
+			System.out.println(session.fmList.getFirst());			
+		}		
 	}
 	
 	private static class LoadFormula implements IShellCommand {
 
 		@Override
-		public void execute(ShellContext ctx, String[] args) {
+		public void execute(ShellSession session, String[] args) {
 			String inputString;
-			inputString = ctx.readCommand("Enter a vaild path:\n$$$ ");
+			inputString = readCommand("Enter a vaild path:\n$$$ ");
 			Path path = Paths.get(inputString);
 			
 			IFormula fm = IOShellStuff.loadFormula(path); // TODO catch Exception
-			IOShellStuff.ifList.add(fm);
-			System.out.println(IOShellStuff.ifList.getFirst());
-			
-		}
-		
-	}
+			session.ifList.add(fm);
+			System.out.println(session.ifList.getFirst());			
+		}		
+	}	
 	
 	private final Map<String, IShellCommand> subCommands = Map.of(
 			"1", new LoadFeatureModel(),
-			"2", (ctx, arg) -> {System.out.println("nothing");}
+			"2", new LoadFormula(),
+			"3", (session, arg) -> {System.out.println("nothing");}
 			);
 	
+	//TODO PrintShellcommands nachgucken Extensions -> laden wie in dieser java
+	
 	@Override
-	public void execute(ShellContext ctx, String[] args) {
+	public void execute(ShellSession session, String[] args) {
 		String inputString;
 		do {
-			inputString = ctx.readCommand("1) load FeatureModel, 2) load nothing e) exit\n$$ ");
+			inputString = readCommand("load: 1) FeatureModel, 2) Formula 3) nothing, e) exit\n$$ ");
 			IShellCommand lShellCommand = subCommands.get(inputString);
 			if(lShellCommand != null) {
-				lShellCommand.execute(ctx, args);
+				lShellCommand.execute(session, args);
 			}
 			if(inputString.equals("e")) {break;}
-		}while(inputString != "e");
-		
+		}while(inputString != "e");		
 	}
+	
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("load");
+    }
 
 
 }
