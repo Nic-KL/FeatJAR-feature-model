@@ -5,4 +5,7 @@
         <extension id="de.featjar.feature.model.io.xml.XMLFeatureModelFormat" />
         <extension id="de.featjar.feature.model.io.dimacs.DimacsFeatureModelFormat" />
     </point>
+    <point id="de.featjar.feature.model.ShellCommands">
+    	<extension id="de.featjar.feature.model.LoadShellCommand" />
+    </point>
 </extensions>

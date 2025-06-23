@@ -15,20 +15,11 @@ import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.IFormula;
 
 public class IOShellStuff {
-	
-	public static List<IFeatureModel> fmList = new ArrayList<>();
-	
-	public static List<IFormula> ifList = new ArrayList<>();
-
-	public static List<BooleanAssignment> configList = new ArrayList<>();
-	
-	public static List<BooleanAssignmentList> sampleList = new ArrayList<>();
-	
-	public static List<BooleanAssignmentGroups> listofSampleLists = new ArrayList<>();
 	
 	public static IFeatureModel loadFeatureModel(Path path) {		
 		
@@ -43,8 +34,6 @@ public class IOShellStuff {
 		}
 	}
 	
-
-	
 	public static IFormula loadFormula(Path path) {
 		
 		Result<IFormula> result = IO.load(path, FormulaFormats.getInstance());
@@ -58,12 +47,24 @@ public class IOShellStuff {
 		}
 	}
 	
-	public static void loadConfig(BooleanAssignment ba) {
-		
+	public static BooleanAssignment loadConfig(Path path) {
+		return null;
 	}
 	
-	public static void loadSample(BooleanAssignmentList sample) {
-		
+	public static BooleanAssignmentList loadSample(Path path) {
+		return null;
+	}
+	
+	public static BooleanAssignmentGroups loadSampleGroup(Path path) {
+		Result<BooleanAssignmentGroups> result = IO.load(path, BooleanAssignmentGroupsFormats.getInstance());
+        
+		if(result.isEmpty()) {
+			List<Problem> problems = result.getProblems();
+			FeatJAR.log().problems(problems);
+			return null; // TODO throw Exception
+		} else {
+			return result.get();
+		}
 	}
 
 }

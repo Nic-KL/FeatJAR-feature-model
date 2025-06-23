@@ -11,7 +11,7 @@ public class IShellCommandManager{
 	private static final Map<String, IShellCommand> COMMADNS = new HashMap<>();
 	
 	static {
-		register(new LoadShellCommand());
+		register(new LoadShellCommand());  //TODO existierende Struktur von Extensions nehemn, ganze Klasse brauch ich nicht
 		register(new ExitShellCommand());
 	}
 	
@@ -22,8 +22,6 @@ public class IShellCommandManager{
 	static Optional<IShellCommand> find(String name) {
 		return Optional.ofNullable(COMMADNS.get(name));
 	}
-	
-
 	
 	private IShellCommandManager() {};
 }
