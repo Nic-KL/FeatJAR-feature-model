@@ -10,7 +10,7 @@ public class StoreShellCommand extends AbstractShellCommand {
 			"1", (ctx, arg) -> );
 
 	public StoreShellCommand() {
-		super("store");
+		super();
 	}
 
 	@Override

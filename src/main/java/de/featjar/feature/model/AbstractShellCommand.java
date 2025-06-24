@@ -14,35 +14,13 @@ public abstract class AbstractShellCommand implements IShellCommand {
 	
 	private static final Scanner in = new Scanner(System.in);
 	
-	public AbstractShellCommand(String name) {
-		this.name = name;
-//		commands.put(this.getCommandName(), this);
+	public AbstractShellCommand() {
+		this.name = getShortName().toString();
 	}
 	
 	//TODO use lambdas etc to add better custom prompt with inheritance
 	public static String readCommand(String prompt) {
-		FeatJAR.log().message(prompt); // TODO eventuell stream aus FEATJAR.log nehemen
+		System.out.println(prompt); // TODO eventuell stream aus FEATJAR.log nehemen
 		return in.nextLine().trim();
 	}
-
-//	@Override
-//	public Map<String, IShellCommand> getCommands() {
-//		// TODO Auto-generated method stub
-//		return commands;
-//	}
-
-
-	public String getCommandName() {
-		return name;
-	}
-	
-//	public Boolean findCommand(String cmd) {
-//		return commands.get(cmd) != null ? true : false;
-//	}
-
-//	public void execute(Path path) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 }

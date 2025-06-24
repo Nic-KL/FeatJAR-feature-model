@@ -18,15 +18,11 @@ public class ShellScanner {
 //		return dmString;
 //	}
 	
-    public List<String> readCommand(String prompt) {
-        System.out.print(prompt);
-        String line = in.nextLine();
-        System.out.println(line);
-        String[] parts = line.trim().split("\\s+");
-        System.out.println(Arrays.toString(parts));
-        List<String> lStrings = Arrays.stream(parts)
-                .collect(Collectors.toList());
-        System.out.println("aaaaaaaaaaa: " + lStrings);
-        return lStrings;
+    public List<String> readCommand(String prompt) {    
+    	
+    	System.out.println(prompt);
+        return Arrays.stream(in.nextLine()
+        		.trim().split("\\s+")).collect(Collectors.toList());
+        
     }
 }
