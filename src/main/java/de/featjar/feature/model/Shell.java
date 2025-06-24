@@ -1,13 +1,9 @@
 package de.featjar.feature.model;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.cli.Option;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
