@@ -17,5 +17,5 @@ public class ShellSession {
 	
 	public List<BooleanAssignmentList> sampleList = new ArrayList<>();
 	
-	public List<BooleanAssignmentGroups> listofSampleLists = new ArrayList<>();
+	public List<BooleanAssignmentGroups> listOfSampleLists = new ArrayList<>();
 }

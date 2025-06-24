@@ -5,11 +5,11 @@ import java.util.Optional;
 public class ExitShellCommand extends AbstractShellCommand {
 
 	public ExitShellCommand() {
-		super("exit");
+		super();
 	}
 	
 	@Override
-	public void execute(ShellSession session, String[] args) {		
+	public void execute(ShellSession session) {		
 		System.out.println(" _____             _       _    _     ____   ____   _            _  _ ");
 		System.out.println("|  ___|___   __ _ | |_    | |  / \\   |  _ \\ / ___| | |__    ___ | || |");
 		System.out.println("| |_  / _ \\ / _` || __|_  | | / _ \\  | |_) |\\___ \\ | '_ \\  / _ \\| || |");
