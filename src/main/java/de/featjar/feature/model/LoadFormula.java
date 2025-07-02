@@ -18,4 +18,7 @@ public class LoadFormula extends LoadShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("loadFormula");
     }
+    public Optional<String> getDescription(){
+    	return Optional.of("load a formula - <cmd> <path>");
+    }
 }
