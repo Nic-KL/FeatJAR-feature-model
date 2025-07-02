@@ -22,4 +22,7 @@ public class ExitShellCommand implements IShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("exit");
     }
+    public Optional<String> getDescription(){
+    	return Optional.of("leave shell");
+    }
 }

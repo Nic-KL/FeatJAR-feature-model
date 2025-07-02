@@ -20,5 +20,8 @@ public class LoadFeatureModel extends LoadShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("loadFeatureModel");
     }
+    public Optional<String> getDescription(){
+    	return Optional.of("load a feature model - <cmd> <path>");
+    }
 }
 

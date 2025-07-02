@@ -19,4 +19,7 @@ public class LoadSample extends LoadShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("loadSample");
     }
+    public Optional<String> getDescription(){
+    	return Optional.of("load a sample - <cmd> <path>");
+    }
 }

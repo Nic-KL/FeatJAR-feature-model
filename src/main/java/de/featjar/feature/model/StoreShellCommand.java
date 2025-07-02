@@ -46,5 +46,7 @@ public class StoreShellCommand implements IShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("store");
     }
-
+    public Optional<String> getDescription(){
+    	return Optional.of("WIP store seesion objetcs on your hard drive - <cmd> <path> <format>");
+    }
 }
