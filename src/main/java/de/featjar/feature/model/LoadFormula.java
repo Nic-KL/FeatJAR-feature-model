@@ -9,7 +9,7 @@ public class LoadFormula extends LoadShellCommand {
 	public void execute(ShellSession session) {
 		//TODO global abort, catch Exception			
 		session.formulaList.add(loadAFormat(Paths.
-				get(readCommand("Enter a vaild path:\n$$$")), FormulaFormats
+				get(Shell.readCommand("Enter a vaild path to load a Formula:\n")), FormulaFormats
 				.getInstance()));	
 	}	
 }

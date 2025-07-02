@@ -6,7 +6,7 @@ import de.featjar.base.io.IO;
 import de.featjar.base.io.format.AFormats;
 import de.featjar.base.log.Log.Verbosity;
 
-public abstract class LoadShellCommand extends AbstractShellCommand {
+public abstract class LoadShellCommand implements IShellCommand {
 
 	public LoadShellCommand() {
 		super();
