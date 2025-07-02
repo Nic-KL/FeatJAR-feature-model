@@ -1,6 +1,7 @@
 package de.featjar.feature.model;
 
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
@@ -14,5 +15,8 @@ public class LoadConfig extends LoadShellCommand {
 				.getFirstGroup()
 				.getFirst());		
 	}
-
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("loadConfig");
+    }
 }
