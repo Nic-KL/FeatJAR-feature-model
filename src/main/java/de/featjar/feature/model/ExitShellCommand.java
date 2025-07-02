@@ -13,10 +13,12 @@ public class ExitShellCommand implements IShellCommand {
 		Shell.printArt();
 		System.exit(0);
 	}	
+	
     @Override
     public Optional<String> getShortName() {
         return Optional.of("exit");
     }
+    
     @Override
     public Optional<String> getDescription(){
     	return Optional.of("leave shell");

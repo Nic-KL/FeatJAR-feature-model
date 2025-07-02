@@ -17,7 +17,7 @@ public class Shell {
 	private static final Scanner shellScanner = new Scanner(System.in);
 
 	private Shell() {
-		FeatJAR.initialize(); // TODO eventuell logger konfigurieren
+		FeatJAR.initialize(); // TODO perhaps configure logger 
 		printArt();		
 		new PrintShellCommand().execute(session);		
 		run();
@@ -76,16 +76,8 @@ public class Shell {
 	
 	//TODO use lambdas etc to add better custom prompt with inheritance
 	public static String readCommand(String prompt) {
-		System.out.println(prompt); // TODO eventuell stream aus FEATJAR.log nehemen
+		System.out.println(prompt);
 		return shellScanner.nextLine().trim();
-	}
-
-	private void printStartMessage() {
-		System.out.println("interactive shell - supported commands are:");
-		System.out.println("print - prints all commands");
-		System.out.println("store - stores data");
-		System.out.println("load - loads data from file");
-		System.out.println("exit - leave shell");
 	}
 
 	public static void printArt() {
