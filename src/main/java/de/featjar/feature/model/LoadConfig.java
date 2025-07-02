@@ -19,6 +19,7 @@ public class LoadConfig extends LoadShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("loadConfig");
     }
+    @Override
     public Optional<String> getDescription(){
     	return Optional.of("load a configuration - <cmd> <path>");
     }

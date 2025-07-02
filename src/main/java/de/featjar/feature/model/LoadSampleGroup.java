@@ -20,6 +20,7 @@ public class LoadSampleGroup extends LoadShellCommand {
     public Optional<String> getShortName() {
         return Optional.of("loadGroupSample");
     }
+    @Override
     public Optional<String> getDescription(){
     	return Optional.of("load a sample group - <cmd> <path>");
     }
