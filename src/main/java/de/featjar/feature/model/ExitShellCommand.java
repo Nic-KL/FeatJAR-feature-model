@@ -2,7 +2,7 @@ package de.featjar.feature.model;
 
 import java.util.Optional;
 
-public class ExitShellCommand extends AbstractShellCommand {
+public class ExitShellCommand implements IShellCommand {
 
 	public ExitShellCommand() {
 		super();
