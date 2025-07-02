@@ -7,10 +7,6 @@ import de.featjar.base.io.format.AFormats;
 import de.featjar.base.log.Log.Verbosity;
 
 public abstract class LoadShellCommand implements IShellCommand {
-
-	public LoadShellCommand() {
-		super();
-	}
 	
 	public static <T> T loadAFormat(Path path, AFormats<T> format) {		
 		return IO.load(path, format).orElseLog(Verbosity.WARNING);
