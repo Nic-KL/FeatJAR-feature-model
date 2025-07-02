@@ -9,7 +9,7 @@ public class LoadConfig extends LoadShellCommand {
 	public void execute(ShellSession session) {
 		//TODO global abort, catch Exception	
 		session.configList.add(loadAFormat(Paths
-				.get(readCommand("Enter a vaild path:\n$$$")), BooleanAssignmentGroupsFormats
+				.get(Shell.readCommand("Enter a vaild path to load a Configuration:\n")), BooleanAssignmentGroupsFormats
 				.getInstance())
 				.getFirstGroup()
 				.getFirst());		

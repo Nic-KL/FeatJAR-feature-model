@@ -10,7 +10,7 @@ public class LoadSample extends LoadShellCommand {
 	public void execute(ShellSession session) {
 		//TODO global abort, catch Exception	
 		session.sampleList.add(loadAFormat(Paths
-				.get(readCommand("Enter a vaild path:\n$$$")), BooleanAssignmentGroupsFormats
+				.get(Shell.readCommand("Enter a vaild path to load a Sample:\n")), BooleanAssignmentGroupsFormats
 				.getInstance())
 				.getFirstGroup());		
 	}

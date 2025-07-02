@@ -1,6 +1,8 @@
 package de.featjar.feature.model;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 import de.featjar.base.FeatJAR;
@@ -11,6 +13,8 @@ import de.featjar.base.data.Result;
 public class Shell {
 
 	public static Shell shell = null;
+	ShellSession session = new ShellSession();
+	private static final Scanner shellScanner = new Scanner(System.in);
 
 	private Shell() {
 		FeatJAR.initialize(); // TODO eventuell logger konfigurieren
@@ -28,12 +32,9 @@ public class Shell {
 	}
 
 	private void run() {
-		ShellSession session = new ShellSession();
-		ShellScanner shellScanner = new ShellScanner();
-
 		while (true) {
 
-			List<String> cmdArg = shellScanner.readCommand("$");
+			List<String> cmdArg = Arrays.stream(readCommand("$").split("\\s+")).collect(Collectors.toList());
 			Result<IShellCommand> command = parseCommand(cmdArg.get(0));
 
 			command.ifPresent(cmd -> cmd.execute(session));
@@ -48,6 +49,8 @@ public class Shell {
 				.collect(Collectors.toList());
 
 		if (commands.size() > 1) {
+			FeatJAR.log().info("Command name " + commandString + " is ambiguous! Found " + commands.size() + " commands: ");
+			commands.forEach(c -> System.out.println(c));
 			return Result.empty(addProblem(Severity.ERROR,
 					"Command name '%s' is ambiguous! It matches the following commands: \n%s", commandString,
 					commands.stream().map(IShellCommand::getIdentifier).collect(Collectors.joining("\n"))));
@@ -57,6 +60,7 @@ public class Shell {
 		if (commands.isEmpty()) {
 			Result<IShellCommand> matchingExtension = shellCommandsExentionsPoint.getMatchingExtension(commandString);
 			if (matchingExtension.isEmpty()) {
+				FeatJAR.log().info("No such command '%s'", commandString);
 				return Result.empty(addProblem(Severity.ERROR, "No command matched the name '%s'!", commandString));
 			}
 			command = matchingExtension.get();
@@ -69,10 +73,16 @@ public class Shell {
 	private Problem addProblem(Severity severity, String message, Object... arguments) {
 		return new Problem(String.format(message, arguments), severity);
 	}
+	
+	//TODO use lambdas etc to add better custom prompt with inheritance
+	public static String readCommand(String prompt) {
+		System.out.println(prompt); // TODO eventuell stream aus FEATJAR.log nehemen
+		return shellScanner.nextLine().trim();
+	}
 
 	private void printStartMessage() {
 		System.out.println("interactive shell - supported commands are:");
-		System.out.println("help - prints all commands");
+		System.out.println("print - prints all commands");
 		System.out.println("store - stores data");
 		System.out.println("load - loads data from file");
 		System.out.println("exit - leave shell");
