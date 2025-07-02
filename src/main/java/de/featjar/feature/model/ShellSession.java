@@ -9,9 +9,9 @@ import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.structure.IFormula;
 
 public class ShellSession {
-	public List<IFeatureModel> fmList = new ArrayList<>();
+	public List<IFeatureModel> featureModelList = new ArrayList<>();
 	
-	public List<IFormula> ifList = new ArrayList<>();
+	public List<IFormula> formulaList = new ArrayList<>();
 
 	public List<BooleanAssignment> configList = new ArrayList<>();
 	
