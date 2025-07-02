@@ -1,6 +1,7 @@
 package de.featjar.feature.model;
 
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import de.featjar.feature.model.io.FeatureModelFormats;
 
@@ -15,5 +16,9 @@ public class LoadFeatureModel extends LoadShellCommand {
 		
 //			System.out.println(session.featureModelList.get(0));
 	}		
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("loadFeatureModel");
+    }
 }
 

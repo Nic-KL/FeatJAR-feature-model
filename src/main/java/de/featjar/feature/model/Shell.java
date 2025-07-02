@@ -45,7 +45,7 @@ public class Shell {
 		ShellCommands shellCommandsExentionsPoint = FeatJAR.extensionPoint(ShellCommands.class);
 		List<IShellCommand> commands = shellCommandsExentionsPoint
 				.getExtensions().stream().filter(command -> command.getShortName()
-						.map(name -> name.startsWith(commandString)).orElse(Boolean.FALSE))
+						.map(name -> name.toLowerCase().startsWith(commandString)).orElse(Boolean.FALSE))
 				.collect(Collectors.toList());
 
 		if (commands.size() > 1) {
