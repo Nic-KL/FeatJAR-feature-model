@@ -14,4 +14,8 @@ public interface IShellCommand extends IExtension{
     default Optional<String> getShortName() {
         return Optional.empty();
     }
+    
+    default Optional<String> getDescription(){
+    	return Optional.empty();
+    }
 }
