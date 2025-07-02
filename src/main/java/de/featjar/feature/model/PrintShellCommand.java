@@ -8,7 +8,8 @@ public class PrintShellCommand implements IShellCommand {
 
 	@Override
 	public void execute(ShellSession session) {
-		FeatJAR.extensionPoint(ShellCommands.class).getExtensions().stream().map(c -> c.getIdentifier()).forEach(System.out::println);		
+		System.out.println("Possible commads are (capitalization is not taken into account):");
+		FeatJAR.extensionPoint(ShellCommands.class).getExtensions().stream().map(c -> c.getShortName().get()).forEach(System.out::println);		
 	}
     @Override
     public Optional<String> getShortName() {
