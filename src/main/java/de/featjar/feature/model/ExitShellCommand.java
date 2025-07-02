@@ -3,10 +3,6 @@ package de.featjar.feature.model;
 import java.util.Optional;
 
 public class ExitShellCommand implements IShellCommand {
-
-	public ExitShellCommand() {
-		super();
-	}
 	
 	@Override
 	public void execute(ShellSession session) {		
