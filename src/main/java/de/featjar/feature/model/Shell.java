@@ -18,8 +18,8 @@ public class Shell {
 
 	private Shell() {
 		FeatJAR.initialize(); // TODO eventuell logger konfigurieren
-		printArt();
-		printStartMessage();
+		printArt();		
+		new PrintShellCommand().execute(session);		
 		run();
 	}
 
@@ -88,7 +88,7 @@ public class Shell {
 		System.out.println("exit - leave shell");
 	}
 
-	private void printArt() {
+	public static void printArt() {
 		System.out.println(" _____             _       _    _     ____   ____   _            _  _ ");
 		System.out.println("|  ___|___   __ _ | |_    | |  / \\   |  _ \\ / ___| | |__    ___ | || |");
 		System.out.println("| |_  / _ \\ / _` || __|_  | | / _ \\  | |_) |\\___ \\ | '_ \\  / _ \\| || |");
