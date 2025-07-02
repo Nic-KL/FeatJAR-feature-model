@@ -13,5 +13,6 @@
     	<extension id="de.featjar.feature.model.LoadSampleGroup" />
     	<extension id="de.featjar.feature.model.PrintShellCommand" />
     	<extension id="de.featjar.feature.model.ExitShellCommand" />
+		<extension id="de.featjar.feature.model.StoreShellCommand" />
     </point>    
 </extensions>
