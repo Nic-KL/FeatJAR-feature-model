@@ -10,9 +10,9 @@ public class PrintShellCommand implements IShellCommand {
 	public void execute(ShellSession session) {
 		System.out.println("Interactive shell - supported commands are (capitalization is not taken into account):\n");
 		FeatJAR.extensionPoint(ShellCommands.class).getExtensions()
-		.stream().map(c -> c.getShortName().orElse("").concat(" - " + c.getDescription().orElse("")))
-		.forEach(System.out::println);		
-		System.out.println();
+			.stream().map(c -> c.getShortName().orElse("")
+			.concat(" - " + c.getDescription().orElse("") + "\n"))
+			.forEach(System.out::println);		
 	}
     @Override
     public Optional<String> getShortName() {
