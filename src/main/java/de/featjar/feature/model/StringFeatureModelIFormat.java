@@ -3,7 +3,7 @@ package de.featjar.feature.model;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.format.IFormat;
 
-public class FeatureModelIFormat implements IFormat<FeatureModel> {
+public class StringFeatureModelIFormat implements IFormat<FeatureModel> {
 	
 	@Override
 	public Result<String> serialize(FeatureModel fm) {
@@ -12,7 +12,7 @@ public class FeatureModelIFormat implements IFormat<FeatureModel> {
     }
 	
 	@Override
-	public FeatureModelIFormat getInstance() {
+	public StringFeatureModelIFormat getInstance() {
 		return this;
 	}
 
