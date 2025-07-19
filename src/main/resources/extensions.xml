@@ -11,8 +11,11 @@
     	<extension id="de.featjar.feature.model.LoadConfig" />
     	<extension id="de.featjar.feature.model.LoadSample" />
     	<extension id="de.featjar.feature.model.LoadSampleGroup" />
-    	<extension id="de.featjar.feature.model.PrintShellCommand" />
+    	<extension id="de.featjar.feature.model.HelpShellCommand" />
     	<extension id="de.featjar.feature.model.ExitShellCommand" />
 		<extension id="de.featjar.feature.model.StoreShellCommand" />
-    </point>    
+		<extension id="de.featjar.feature.model.PrintShellCommand" />
+		<extension id="de.featjar.feature.model.PrintShellCommand" />
+		<extension id="de.featjar.feature.model.ClearShellCommand" />
+    </point>       
 </extensions>

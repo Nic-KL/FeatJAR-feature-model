@@ -15,6 +15,7 @@ import de.featjar.base.io.text.StringTextFormat;
 import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.feature.model.io.xml.XMLFeatureModelFormat;
 import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
+import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
 import de.featjar.formula.io.dimacs.FormulaDimacsFormat;
 
 // TODO nicht alle Vriablen sondern nur X gleiches für load, Format dass alles als String speichert, autocomplete und dann erst weiter \r dann geht er einen zurück in der konsole, globales abort
@@ -39,7 +40,14 @@ public class StoreShellCommand implements IShellCommand {
 //		StringTextFormat st = new StringTextFormat();
 
 		System.out.println(session.listOfSampleLists.get(0));
-		session.listOfSampleLists.forEach(t -> save(t, Paths.get("/home/hans/Dokumente/Uni/Arbeit/Sebastian/Neu/FeatJAR/feature-model/abc.xml"), new BooleanAssignmentGroupsCSVFormat()));
+			session.featureModelList.forEach(t -> {
+			    if (t instanceof FeatureModel) {
+			        save((FeatureModel) t, Paths.get("/home/hans/Dokumente/Uni/Arbeit/Sebastian/Neu/FeatJAR/feature-model/abc1.text"), new FeatureModelIFormat());
+			    } else {
+			        // Handle the case where t is not an instance of FeatureModel
+			        System.err.println("Element is not an instance of FeatureModel: " + t);
+			    }
+			});
 	}
 	
     @Override
