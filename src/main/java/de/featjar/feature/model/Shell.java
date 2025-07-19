@@ -19,7 +19,7 @@ public class Shell {
 	private Shell() {
 		FeatJAR.initialize(); // TODO perhaps configure logger 
 		printArt();		
-		new PrintShellCommand().execute(session);		
+		new HelpShellCommand().execute(session);		
 		run();
 	}
 
