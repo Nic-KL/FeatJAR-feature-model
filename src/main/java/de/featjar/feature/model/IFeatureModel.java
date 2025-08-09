@@ -20,6 +20,8 @@
  */
 package de.featjar.feature.model;
 
+import java.util.Collection;
+
 import de.featjar.base.data.IAttribute;
 import de.featjar.base.data.Result;
 import de.featjar.base.data.identifier.IIdentifier;
@@ -27,7 +29,6 @@ import de.featjar.feature.model.mixins.IHasCommonAttributes;
 import de.featjar.feature.model.mixins.IHasConstraints;
 import de.featjar.feature.model.mixins.IHasFeatureTree;
 import de.featjar.formula.structure.IFormula;
-import java.util.Collection;
 
 /**
  * A feature model represents the configuration space of a software system.

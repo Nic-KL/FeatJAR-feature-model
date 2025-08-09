@@ -1,0 +1,24 @@
+package de.featjar.feature.model;
+
+import java.util.List;
+import java.util.Optional;
+
+public class Variables implements IShellCommand{
+
+	@Override
+	public void execute(ShellSession session, List<String> cmdParams) {
+		session.printKeySet();
+		
+	}
+	
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("variables");
+    }
+    
+    @Override
+    public Optional<String> getDescription(){
+    	return Optional.of("WIP");
+    }
+
+}

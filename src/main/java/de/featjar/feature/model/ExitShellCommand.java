@@ -1,11 +1,12 @@
 package de.featjar.feature.model;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ExitShellCommand implements IShellCommand {
 	
 	@Override
-	public void execute(ShellSession session) {		
+	public void execute(ShellSession session, List<String> cmdParams) {		
 		Shell.printArt();
 		System.exit(0);
 	}	

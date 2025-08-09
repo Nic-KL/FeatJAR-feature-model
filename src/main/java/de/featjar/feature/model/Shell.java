@@ -1,7 +1,9 @@
 package de.featjar.feature.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -19,7 +21,7 @@ public class Shell {
 	private Shell() {
 		FeatJAR.initialize(); // TODO perhaps configure logger 
 		printArt();		
-		new HelpShellCommand().execute(session);		
+		new HelpShellCommand().execute(session, null);		
 		run();
 	}
 
@@ -33,15 +35,20 @@ public class Shell {
 
 	private void run() {
 		while (true) {
-
-			List<String> cmdArg = Arrays.stream(readCommand("$").split("\\s+")).collect(Collectors.toList());
-			Result<IShellCommand> command = parseCommand(cmdArg.get(0));
-
-			command.ifPresent(cmd -> cmd.execute(session));
+//			List<String> cmdArg = Arrays.stream(readCommand("$").split("\\s+")).collect(Collectors.toList());
+			List<String> cmdArg = readCommand("$")
+				    .map(c -> Arrays.stream(c.split("\\s+")).collect(Collectors.toList()))
+				    .orElse(Collections.emptyList());
+			
+			if(!cmdArg.isEmpty()) {
+				Result<IShellCommand> command = parseCommand(cmdArg.get(0));
+				cmdArg.remove(0);
+				command.ifPresent(cmd -> cmd.execute(session, cmdArg));
+			}
 		}
 	}
 
-	private Result<IShellCommand> parseCommand(String commandString) {
+	private Result<IShellCommand> parseCommand(String commandString) {	
 		ShellCommands shellCommandsExentionsPoint = FeatJAR.extensionPoint(ShellCommands.class);
 		List<IShellCommand> commands = shellCommandsExentionsPoint
 				.getExtensions().stream().filter(command -> command.getShortName()
@@ -50,7 +57,7 @@ public class Shell {
 
 		if (commands.size() > 1) {
 			FeatJAR.log().info("Command name " + commandString + " is ambiguous! Found " + commands.size() + " commands: ");
-			commands.forEach(c -> System.out.println(c));
+			commands.forEach(c -> System.out.println(c.getShortName().get() + " - " + c.getDescription().get()));
 			return Result.empty(addProblem(Severity.ERROR,
 					"Command name '%s' is ambiguous! It matches the following commands: \n%s", commandString,
 					commands.stream().map(IShellCommand::getIdentifier).collect(Collectors.joining("\n"))));
@@ -75,9 +82,10 @@ public class Shell {
 	}
 	
 	//TODO use lambdas etc to add better custom prompt with inheritance
-	public static String readCommand(String prompt) {
+	public static Optional<String> readCommand(String prompt) {
 		System.out.println(prompt);
-		return shellScanner.nextLine().trim();
+		String input = shellScanner.nextLine().trim();
+		return input.isEmpty() ? Optional.empty() : Optional.of(input);
 	}
 
 	public static void printArt() {

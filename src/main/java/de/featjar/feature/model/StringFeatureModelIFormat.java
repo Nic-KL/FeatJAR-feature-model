@@ -6,8 +6,7 @@ import de.featjar.base.io.format.IFormat;
 public class StringFeatureModelIFormat implements IFormat<FeatureModel> {
 	
 	@Override
-	public Result<String> serialize(FeatureModel fm) {
-		
+	public Result<String> serialize(FeatureModel fm) {		
         return Result.of(fm.toString());
     }
 	

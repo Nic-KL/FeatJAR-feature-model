@@ -20,11 +20,12 @@
  */
 package de.featjar.feature.model;
 
+import java.util.LinkedHashSet;
+
 import de.featjar.base.data.Result;
 import de.featjar.base.data.Sets;
 import de.featjar.base.data.identifier.AIdentifier;
 import de.featjar.feature.model.mixins.IHasCommonAttributes;
-import java.util.LinkedHashSet;
 
 /**
  * A feature in a {@link FeatureModel} describes some functionality of a software system.

@@ -17,5 +17,7 @@
 		<extension id="de.featjar.feature.model.PrintShellCommand" />
 		<extension id="de.featjar.feature.model.PrintShellCommand" />
 		<extension id="de.featjar.feature.model.ClearShellCommand" />
+		<extension id="de.featjar.feature.model.DeleteShellCommand" />
+		<extension id="de.featjar.feature.model.Variables" />
     </point>       
 </extensions>

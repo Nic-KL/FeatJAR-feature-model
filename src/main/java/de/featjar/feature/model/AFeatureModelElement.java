@@ -20,16 +20,17 @@
  */
 package de.featjar.feature.model;
 
-import de.featjar.base.data.Attribute;
-import de.featjar.base.data.IAttributable.IMutatableAttributable;
-import de.featjar.base.data.IAttribute;
-import de.featjar.base.data.identifier.AIdentifier;
-import de.featjar.base.data.identifier.IIdentifier;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import de.featjar.base.data.Attribute;
+import de.featjar.base.data.IAttributable.IMutatableAttributable;
+import de.featjar.base.data.IAttribute;
+import de.featjar.base.data.identifier.AIdentifier;
+import de.featjar.base.data.identifier.IIdentifier;
 
 /**
  * Implements identification and attribute valuation.
