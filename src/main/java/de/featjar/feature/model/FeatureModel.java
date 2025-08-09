@@ -20,6 +20,16 @@
  */
 package de.featjar.feature.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import de.featjar.base.data.Attribute;
 import de.featjar.base.data.IAttributable.IMutatableAttributable;
 import de.featjar.base.data.IAttribute;
@@ -30,15 +40,6 @@ import de.featjar.base.data.identifier.UUIDIdentifier;
 import de.featjar.base.tree.Trees;
 import de.featjar.feature.model.IFeatureModel.IMutableFeatureModel;
 import de.featjar.formula.structure.IFormula;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 public class FeatureModel implements IMutableFeatureModel, IMutatableAttributable {
 

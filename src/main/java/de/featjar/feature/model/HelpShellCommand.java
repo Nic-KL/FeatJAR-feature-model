@@ -1,5 +1,6 @@
 package de.featjar.feature.model;
 
+import java.util.List;
 import java.util.Optional;
 
 import de.featjar.base.FeatJAR;
@@ -7,7 +8,7 @@ import de.featjar.base.FeatJAR;
 public class HelpShellCommand implements IShellCommand {
 	
 	@Override
-	public void execute(ShellSession session) {
+	public void execute(ShellSession session, List<String> cmdParams) {
 		System.out.println("Interactive shell - supported commands are (capitalization is not taken into account):\n");
 		FeatJAR.extensionPoint(ShellCommands.class).getExtensions()
 			.stream().map(c -> c.getShortName().orElse("")

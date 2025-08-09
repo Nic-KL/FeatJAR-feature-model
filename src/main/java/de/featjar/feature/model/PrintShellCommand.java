@@ -1,38 +1,42 @@
 package de.featjar.feature.model;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.formula.structure.IFormula;
 
 public class PrintShellCommand implements IShellCommand {
 
 	@Override
-	public void execute(ShellSession session) {
-		//TODO layer for electing the type and then
-		printMap(session.featureModelList);
-		printMap(session.formulaList);
-		printMap(session.configList);
-		printMap(session.sampleList);
-		printMap(session.listOfSampleLists);		
+	public void execute(ShellSession session, List<String> cmdParams) {
+		//  TODO layer for electing the type and then	
+		
+		if(cmdParams.isEmpty()) {
+			cmdParams = Shell.readCommand("Enter the variable names you want to print:")
+				    .map(c -> Arrays.stream(c.toLowerCase().split("\\s+")).collect(Collectors.toList()))
+				    .orElse(Collections.emptyList());
+		}
+			
+		cmdParams.forEach(e -> {
+		    session.getElement(e)
+		        .ifPresentOrElse(m -> {
+		        	System.out.println(e + ": \n\n");
+		        	printMap(m);
+		        }, () -> FeatJAR.log().error("Could not find a variable named " + e));
+		});	
 	}
 	
-	
-	private void printMap(Map<String, ?> map) {
-		if(map.isEmpty()) {
-			return;
-		}
-		map.forEach((key, t) ->{
-			if (t instanceof List) {
-				System.out.println(key + ": ");
-				((List) t).forEach(l -> System.out.println(l));
-			} else if (t instanceof IFormula) {
-				System.out.println(key + ": " + "\n" + ((IFormula) t).print());
+	private void printMap(Object v) {
+			if (v instanceof IFormula) {
+				System.out.println(((IFormula) v).print());
 			} else {
-				System.out.println(key + ": " + "\n" + t);
+				System.out.println(v);
 			}
-		});
+			System.out.println("");
 	}
 	
     public Optional<String> getShortName() {
