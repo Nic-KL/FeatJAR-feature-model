@@ -89,7 +89,7 @@ public class ComputeFormula extends AComputation<IFormula> {
                     if (!group.isAnd()) {
                         List<IFormula> groupLiterals = new ArrayList<>();
                         for (IFeatureTree childTree : parentTree.getChildren()) {
-                            if (childTree.getGroup() == group) {
+                            if (childTree.getParentGroup() == group) {
                                 groupLiterals.add(Expressions.literal(
                                         childTree.getFeature().getName().orElse("")));
                             }
@@ -107,7 +107,7 @@ public class ComputeFormula extends AComputation<IFormula> {
                 }
             }
             for (IFeatureTree child : tree.getChildren()) {
-                child.getGroup();
+                child.getParentGroup();
             }
             IFeatureModel featureModel2 = feature.getFeatureModel();
             if (featureModels.add(featureModel)) {

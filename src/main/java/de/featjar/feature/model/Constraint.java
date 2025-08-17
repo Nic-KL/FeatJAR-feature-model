@@ -20,7 +20,6 @@
  */
 package de.featjar.feature.model;
 
-import de.featjar.base.data.Sets;
 import de.featjar.base.tree.Trees;
 import de.featjar.feature.model.IConstraint.IMutableConstraint;
 import de.featjar.formula.structure.IFormula;
@@ -28,7 +27,6 @@ import java.util.LinkedHashSet;
 
 public class Constraint extends AFeatureModelElement implements IMutableConstraint {
     protected IFormula formula;
-    protected final LinkedHashSet<IFeature> containedFeaturesCache = Sets.empty();
 
     protected Constraint(IFeatureModel featureModel, IFormula formula) {
         super(featureModel);
@@ -61,7 +59,7 @@ public class Constraint extends AFeatureModelElement implements IMutableConstrai
 
     @Override
     public LinkedHashSet<IFeature> getReferencedFeatures() {
-        return containedFeaturesCache;
+        return IConstraint.getReferencedFeatures(formula, featureModel);
     }
 
     @Override
@@ -71,9 +69,7 @@ public class Constraint extends AFeatureModelElement implements IMutableConstrai
 
     @Override
     public void setFormula(IFormula formula) {
-        containedFeaturesCache.clear();
-        containedFeaturesCache.addAll(IConstraint.getReferencedFeatures(formula, featureModel));
-        Constraint.this.formula = formula;
+        this.formula = formula;
     }
 
     @Override

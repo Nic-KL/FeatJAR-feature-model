@@ -20,6 +20,7 @@
  */
 package de.featjar.feature.model;
 
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.data.Sets;
 import de.featjar.base.data.identifier.AIdentifier;
@@ -57,6 +58,24 @@ public interface IFeature extends IFeatureModelElement, IHasCommonAttributes {
 
     default boolean isHidden() {
         return (boolean) getAttributeValue(Attributes.HIDDEN).get();
+    }
+
+    /**
+     * Checks if there is a hidden feature higher up in the hierarchy.
+     * Does not only check the direct parent, but all parents above.
+     * @return {@code true} if any of this features's parents are hidden, {@code false} otherwise.
+     */
+    default boolean hasHiddenParent() {
+        IFeatureTree parentTreeElement =
+                getFeatureTree().orElseThrow(Problem::toException).getParent().orElse(null);
+
+        while (parentTreeElement != null) {
+            if (parentTreeElement.getFeature().isHidden()) {
+                return true;
+            }
+            parentTreeElement = parentTreeElement.getParent().orElse(null);
+        }
+        return false;
     }
 
     default boolean isVisible() {

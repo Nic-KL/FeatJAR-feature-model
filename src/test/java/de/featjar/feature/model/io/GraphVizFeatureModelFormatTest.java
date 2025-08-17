@@ -48,6 +48,7 @@ public class GraphVizFeatureModelFormatTest extends Common {
     @Test
     public void graphVizFeatureModelFormat() throws IOException {
         IFeatureModel featureModel = load("testFeatureModels/car.xml", new XMLFeatureModelFormat());
-        assertTrue(IO.print(featureModel, new GraphVizFeatureModelFormat()).startsWith("digraph {"));
+        String print = IO.print(featureModel, new GraphVizFeatureModelFormat());
+        assertTrue(print.startsWith("digraph {"));
     }
 }

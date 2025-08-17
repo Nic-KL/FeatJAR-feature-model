@@ -31,7 +31,8 @@ import java.util.List;
 
 /**
  * An ordered {@link ARootedTree} labeled with {@link Feature features}.
- * Implements some concepts from feature-oriented domain analysis, such as mandatory/optional features and groups.
+ * Implements some concepts from feature-oriented domain analysis, such as
+ * mandatory/optional features and groups.
  *
  * @author Elias Kuiter
  */
@@ -41,22 +42,22 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
 
     List<Group> getGroups();
 
-    Group getGroup();
+    Group getGroup(int groupID);
 
-    List<IFeatureTree> getGroupSiblings();
+    List<IFeatureTree> getChildren(int groupID);
 
-    List<IFeatureTree> getGroupChildren(int groupID);
+    Group getParentGroup();
 
-    int getFeatureRangeLowerBound();
+    int getFeatureCardinalityLowerBound();
 
-    int getFeatureRangeUpperBound();
+    int getFeatureCardinalityUpperBound();
 
     default boolean isMandatory() {
-        return getFeatureRangeLowerBound() > 0;
+        return getFeatureCardinalityLowerBound() > 0;
     }
 
     default boolean isOptional() {
-        return getFeatureRangeLowerBound() <= 0;
+        return getFeatureCardinalityLowerBound() <= 0;
     }
 
     default IMutableFeatureTree mutate() {
@@ -76,7 +77,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         default IFeatureTree addFeatureBelow(IFeature newFeature, int index, int groupID) {
             FeatureTree newTree = new FeatureTree(newFeature);
             addChild(index, newTree);
-            newTree.setGroupID(groupID);
+            newTree.setParentGroupID(groupID);
             return newTree;
         }
 
@@ -85,10 +86,9 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
             Result<IFeatureTree> parent = getParent();
             if (parent.isPresent()) {
                 parent.get().replaceChild(this, newTree);
-                newTree.setGroupID(this.getGroupID());
             }
             newTree.addChild(this);
-            this.setGroupID(0);
+            setParentGroupID(0);
             return newTree;
         }
 
@@ -97,48 +97,99 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
             if (parent.isPresent()) {
                 int childIndex = parent.get().getChildIndex(this).orElseThrow();
                 parent.get().removeChild(this);
-                int groupID = parent.get().getGroups().size();
                 // TODO improve group handling, probably needs slicing
                 for (Group group : getGroups()) {
-                    parent.get().mutate().addGroup(group.getLowerBound(), group.getUpperBound());
+                    parent.get().mutate().addCardinalityGroup(group.getLowerBound(), group.getUpperBound());
                 }
                 for (IFeatureTree child : getChildren()) {
                     parent.get().mutate().addChild(childIndex++, child);
-                    child.mutate().setGroupID(groupID + child.getGroupID());
                 }
             }
         }
 
-        void setFeatureRange(Range featureRange);
+        void setParentGroupID(int groupID);
 
-        void setFeature(IFeature feature);
+        void setFeatureCardinality(Range featureRange);
 
-        void addGroup(int lowerBound, int upperBound);
+        void makeMandatory();
 
-        void addGroup(Range groupRange);
+        void makeOptional();
 
-        void setGroups(List<Group> groups);
+        int addCardinalityGroup(int lowerBound, int upperBound);
 
-        void setGroupID(int groupID);
-
-        void setMandatory();
-
-        void setOptional();
-
-        void setGroupRange(Range groupRange);
-
-        default void setAnd() {
-            setGroupRange(Range.atLeast(0));
+        default int addCardinalityGroup(Range groupRange) {
+            return addCardinalityGroup(groupRange.getLowerBound(), groupRange.getUpperBound());
         }
 
-        default void setAlternative() {
-            setGroupRange(Range.exactly(1));
+        default int addAndGroup() {
+            return addCardinalityGroup(0, Range.OPEN);
         }
 
-        default void setOr() {
-            setGroupRange(Range.atLeast(1));
+        default int addAlternativeGroup() {
+            return addCardinalityGroup(1, 1);
+        }
+
+        default int addOrGroup() {
+            return addCardinalityGroup(1, Range.OPEN);
+        }
+
+        /**
+         * Change children group to cardinality group.
+         *
+         * @param groupId          the id of the group to change
+         * @param groupCardinality the new cardinality
+         */
+        void toCardinalityGroup(int groupId, Range groupCardinality);
+
+        /**
+         * Change children group to and group.
+         *
+         * @param groupId the id of the group to change
+         */
+        void toAndGroup(int groupId);
+
+        /**
+         * Change children group to or group.
+         *
+         * @param groupId the id of the group to change
+         */
+        void toOrGroup(int groupId);
+
+        /**
+         * Change children group to alternative group.
+         *
+         * @param groupId the id of the group to change
+         */
+        void toAlternativeGroup(int groupId);
+
+        /**
+         * Change first children group to cardinality group.
+         *
+         * @param groupCardinality the new cardinality
+         */
+        default void toCardinalityGroup(Range groupCardinality) {
+            toCardinalityGroup(0, groupCardinality);
+        }
+
+        /**
+         * Change first children group to and group.
+         */
+        default void toAndGroup() {
+            toAndGroup(0);
+        }
+
+        /**
+         * Change first children group to alternative group.
+         */
+        default void toAlternativeGroup() {
+            toAlternativeGroup(0);
+        }
+
+        /**
+         * Change first children group to or group.
+         */
+        default void toOrGroup() {
+            toOrGroup(0);
         }
     }
-
-    int getGroupID();
 }

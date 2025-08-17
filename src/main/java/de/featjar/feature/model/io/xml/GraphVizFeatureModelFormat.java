@@ -44,7 +44,7 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
     }
 
     @Override
-    public boolean supportsSerialize() {
+    public boolean supportsWrite() {
         return true;
     }
 
@@ -73,20 +73,22 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
                 options(
                         option("label", feature.getFeature().getName().orElse("")),
                         option("fillcolor", feature.getFeature().isAbstract() ? "#f2f2ff" : null)));
-        nodeString += String.format(
-                "%n  %s%s;",
-                quote(feature.getFeature().getIdentifier().toString() + "_group"),
-                options(
-                        option("shape", "diamond"),
-                        option(
-                                "style",
-                                !feature.getGroup().isAnd()
-                                        ? "invis"
-                                        : feature.getGroup().isAlternative() ? "" : null),
-                        option("fillcolor", feature.getGroup().isOr() ? "#000000" : null),
-                        option("label", ""),
-                        option("width", ".15"),
-                        option("height", ".15")));
+        if (feature.hasParent()) {
+            nodeString += String.format(
+                    "%n  %s%s;",
+                    quote(feature.getFeature().getIdentifier().toString() + "_group"),
+                    options(
+                            option("shape", "diamond"),
+                            option(
+                                    "style",
+                                    !feature.getParentGroup().isAnd()
+                                            ? "invis"
+                                            : feature.getParentGroup().isAlternative() ? "" : null),
+                            option("fillcolor", feature.getParentGroup().isOr() ? "#000000" : null),
+                            option("label", ""),
+                            option("width", ".15"),
+                            option("height", ".15")));
+        }
         return nodeString;
     }
 
@@ -98,16 +100,15 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
             edgeString += getEdge(
                     parentNode + "_group",
                     feature,
-                    option("style", feature.getParent().get().getGroup().isAnd() ? null : "invis"));
-            if (!feature.getParent().get().getGroup().isAnd())
-                edgeString += getEdge(
-                        parentNode + (feature.getParent().get().getGroup().isAnd() ? "_group" : ""), feature, "");
+                    option("style", feature.getParentGroup().isAnd() ? null : "invis"));
+            if (!feature.getParentGroup().isAnd())
+                edgeString += getEdge(parentNode + (feature.getParentGroup().isAnd() ? "_group" : ""), feature, "");
+            edgeString += String.format(
+                    "  %s:s -> %s:n%s;",
+                    quote(feature.getFeature().getIdentifier().toString()),
+                    quote(feature.getFeature().getIdentifier().toString() + "_group"),
+                    options(option("style", feature.getParentGroup().isAnd() ? null : "invis")));
         }
-        edgeString += String.format(
-                "  %s:s -> %s:n%s;",
-                quote(feature.getFeature().getIdentifier().toString()),
-                quote(feature.getFeature().getIdentifier().toString() + "_group"),
-                options(option("style", feature.getGroup().isAnd() ? null : "invis")));
         return edgeString;
     }
 
@@ -119,7 +120,7 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
                 options(
                         option(
                                 "arrowhead",
-                                childFeature.getParent().get().getGroup().isAnd()
+                                childFeature.getParentGroup().isAnd()
                                         ? null
                                         : childFeature.isMandatory() ? "dot" : "odot"),
                         option));
