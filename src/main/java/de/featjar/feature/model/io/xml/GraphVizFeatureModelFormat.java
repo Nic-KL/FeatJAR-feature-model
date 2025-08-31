@@ -22,7 +22,8 @@ package de.featjar.feature.model.io.xml;
 
 import de.featjar.base.data.Result;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.feature.model.*;
+import de.featjar.feature.model.IFeatureModel;
+import de.featjar.feature.model.IFeatureTree;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,10 +82,10 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
                             option("shape", "diamond"),
                             option(
                                     "style",
-                                    !feature.getParentGroup().isAnd()
+                                    !feature.getParentGroup().get().isAnd()
                                             ? "invis"
-                                            : feature.getParentGroup().isAlternative() ? "" : null),
-                            option("fillcolor", feature.getParentGroup().isOr() ? "#000000" : null),
+                                            : feature.getParentGroup().get().isAlternative() ? "" : null),
+                            option("fillcolor", feature.getParentGroup().get().isOr() ? "#000000" : null),
                             option("label", ""),
                             option("width", ".15"),
                             option("height", ".15")));
@@ -100,14 +101,15 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
             edgeString += getEdge(
                     parentNode + "_group",
                     feature,
-                    option("style", feature.getParentGroup().isAnd() ? null : "invis"));
-            if (!feature.getParentGroup().isAnd())
-                edgeString += getEdge(parentNode + (feature.getParentGroup().isAnd() ? "_group" : ""), feature, "");
+                    option("style", feature.getParentGroup().get().isAnd() ? null : "invis"));
+            if (!feature.getParentGroup().get().isAnd())
+                edgeString +=
+                        getEdge(parentNode + (feature.getParentGroup().get().isAnd() ? "_group" : ""), feature, "");
             edgeString += String.format(
                     "  %s:s -> %s:n%s;",
                     quote(feature.getFeature().getIdentifier().toString()),
                     quote(feature.getFeature().getIdentifier().toString() + "_group"),
-                    options(option("style", feature.getParentGroup().isAnd() ? null : "invis")));
+                    options(option("style", feature.getParentGroup().get().isAnd() ? null : "invis")));
         }
         return edgeString;
     }
@@ -120,7 +122,7 @@ public class GraphVizFeatureModelFormat implements IFormat<IFeatureModel> {
                 options(
                         option(
                                 "arrowhead",
-                                childFeature.getParentGroup().isAnd()
+                                childFeature.getParentGroup().get().isAnd()
                                         ? null
                                         : childFeature.isMandatory() ? "dot" : "odot"),
                         option));
