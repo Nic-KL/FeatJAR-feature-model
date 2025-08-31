@@ -69,6 +69,10 @@ public class AttributeIO {
         return Result.empty();
     }
 
+    public static Result<Attribute<?>> parseAttribute(String name, String typeString) {
+        return getType(typeString).map(type -> new Attribute<>(name, type));
+    }
+
     public static Result<Attribute<?>> parseAttribute(String namespace, String name, String typeString) {
         return getType(typeString).map(type -> new Attribute<>(namespace, name, type));
     }
