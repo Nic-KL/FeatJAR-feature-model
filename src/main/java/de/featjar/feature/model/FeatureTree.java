@@ -56,10 +56,6 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
             groupCardinality.setBounds(lowerBound, upperBound);
         }
 
-        private void setBounds(Range groupCardinality) {
-            groupCardinality.setBounds(groupCardinality);
-        }
-
         public int getLowerBound() {
             return groupCardinality.getLowerBound();
         }
@@ -88,10 +84,13 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
             return groupCardinality.getLowerBound() <= 0;
         }
 
-        public List<IFeatureTree> getGroupChildren() {
-            return getChildren().stream()
-                    .filter(t -> t.getParentGroup() == this)
-                    .collect(Collectors.toList());
+        public List<IFeatureTree> getGroupSiblings() {
+            IFeatureTree parent = getParent().orElse(null);
+            return (parent == null)
+                    ? List.of()
+                    : parent.getChildren().stream()
+                            .filter(t -> t.getParentGroupID() == parentGroupID)
+                            .collect(Collectors.toList());
         }
 
         @Override
@@ -120,7 +119,7 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     protected int parentGroupID;
 
     protected Range cardinality;
-    protected List<Group> childrenGroups;
+    protected ArrayList<Group> childrenGroups;
 
     protected LinkedHashMap<IAttribute<?>, Object> attributeValues;
 
@@ -145,24 +144,30 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     }
 
     @Override
-    public Group getParentGroup() {
-        return parent == null ? null : parent.getGroups().get(parentGroupID);
+    public int getParentGroupID() {
+        return parentGroupID;
     }
 
     @Override
-    public List<Group> getGroups() {
+    public Optional<Group> getParentGroup() {
+        return parent == null ? Optional.empty() : parent.getChildrenGroup(parentGroupID);
+    }
+
+    @Override
+    public List<Group> getChildrenGroups() {
         return Collections.unmodifiableList(childrenGroups);
     }
 
     @Override
-    public Group getGroup(int groupID) {
-        return getGroups().get(groupID);
+    public Optional<Group> getChildrenGroup(int groupID) {
+        return Optional.ofNullable(getChildrenGroups().get(groupID));
     }
 
     @Override
     public List<IFeatureTree> getChildren(int groupID) {
-        final Group group = getGroup(groupID);
-        return getChildren().stream().filter(c -> c.getParentGroup() == group).collect(Collectors.toList());
+        return getChildren().stream()
+                .filter(c -> c.getParentGroupID() == groupID)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -225,15 +230,10 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     public void setParentGroupID(int groupID) {
         if (parent == null) throw new IllegalArgumentException("Cannot set groupID for root feature!");
         if (groupID < 0) throw new IllegalArgumentException(String.format("groupID must be positive (%d)", groupID));
-        if (groupID >= parent.getGroups().size())
+        if (groupID >= parent.getChildrenGroups().size())
             throw new IllegalArgumentException(
                     String.format("groupID must be smaller than number of groups in parent feature (%d)", groupID));
         this.parentGroupID = groupID;
-    }
-
-    @Override
-    public void toCardinalityGroup(int groupId, Range groupCardinality) {
-        getGroup(groupId).setBounds(groupCardinality);
     }
 
     @Override
@@ -279,17 +279,10 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     }
 
     @Override
-    public void toAndGroup(int groupId) {
-        getGroup(groupId).setBounds(0, Range.OPEN);
-    }
-
-    @Override
-    public void toOrGroup(int groupId) {
-        getGroup(groupId).setBounds(1, Range.OPEN);
-    }
-
-    @Override
-    public void toAlternativeGroup(int groupId) {
-        getGroup(groupId).setBounds(1, 1);
+    public void toCardinalityGroup(int groupID, int lowerBound, int upperBound) {
+        Group group = getChildrenGroups().get(groupID);
+        if (group != null) {
+            group.setBounds(lowerBound, upperBound);
+        }
     }
 }

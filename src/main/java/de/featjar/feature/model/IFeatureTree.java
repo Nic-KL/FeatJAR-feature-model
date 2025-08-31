@@ -28,6 +28,7 @@ import de.featjar.base.tree.structure.IRootedTree;
 import de.featjar.feature.model.FeatureTree.Group;
 import de.featjar.feature.model.mixins.IHasFeatureTree;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An ordered {@link ARootedTree} labeled with {@link Feature features}.
@@ -35,18 +36,41 @@ import java.util.List;
  * mandatory/optional features and groups.
  *
  * @author Elias Kuiter
+ * @author Sebastian Krieter
  */
 public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, IHasFeatureTree {
 
     IFeature getFeature();
 
-    List<Group> getGroups();
+    /**
+     * {@return the groups of this feature's children.}
+     * This list may contain {@code null}.
+     */
+    List<Group> getChildrenGroups();
 
-    Group getGroup(int groupID);
+    /**
+     * {@return the group of this feature's children with the given id.}
+     * @param groupID the groupID
+     */
+    Optional<Group> getChildrenGroup(int groupID);
 
+    /**
+     * {@return all children within the group with the given id.}
+     * @param groupID the groupID
+     */
     List<IFeatureTree> getChildren(int groupID);
 
-    Group getParentGroup();
+    /**
+     * {@return the group of this feature. (The group of this feature's parent, in which this feature is contained.)}
+     * @see #getParentGroupID()
+     */
+    Optional<Group> getParentGroup();
+
+    /**
+     * {@return the id of the group of this feature.}
+     * @see #getParentGroup()
+     */
+    int getParentGroupID();
 
     int getFeatureCardinalityLowerBound();
 
@@ -98,7 +122,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
                 int childIndex = parent.get().getChildIndex(this).orElseThrow();
                 parent.get().removeChild(this);
                 // TODO improve group handling, probably needs slicing
-                for (Group group : getGroups()) {
+                for (Group group : getChildrenGroups()) {
                     parent.get().mutate().addCardinalityGroup(group.getLowerBound(), group.getUpperBound());
                 }
                 for (IFeatureTree child : getChildren()) {
@@ -134,36 +158,57 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         }
 
         /**
-         * Change children group to cardinality group.
+         * Changes the cardinality of the children group with the given id.
+         *
+         * @param groupId          the id of the group to change
+         * @param lowerBound       the new lower bound
+         * @param upperBound       the new upper bound
+         */
+        void toCardinalityGroup(int groupID, int lowerBound, int upperBound);
+
+        /**
+         * Changes the cardinality of the children group with the given id.
          *
          * @param groupId          the id of the group to change
          * @param groupCardinality the new cardinality
          */
-        void toCardinalityGroup(int groupId, Range groupCardinality);
+        default void toCardinalityGroup(int groupID, Range groupCardinality) {
+            toCardinalityGroup(groupID, groupCardinality.getLowerBound(), groupCardinality.getUpperBound());
+        }
 
         /**
          * Change children group to and group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 0, Range.OPEN)}.
          *
          * @param groupId the id of the group to change
          */
-        void toAndGroup(int groupId);
+        default void toAndGroup(int groupID) {
+            toCardinalityGroup(groupID, 0, Range.OPEN);
+        }
 
         /**
          * Change children group to or group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, Range.OPEN)}.
          *
          * @param groupId the id of the group to change
          */
-        void toOrGroup(int groupId);
+        default void toOrGroup(int groupID) {
+            toCardinalityGroup(groupID, 1, Range.OPEN);
+        }
 
         /**
          * Change children group to alternative group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, 1)}.
          *
          * @param groupId the id of the group to change
          */
-        void toAlternativeGroup(int groupId);
+        default void toAlternativeGroup(int groupID) {
+            toCardinalityGroup(groupID, 1, 1);
+        }
 
         /**
-         * Change first children group to cardinality group.
+         * Changes the cardinality of the first children group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, groupCardinality)}.
          *
          * @param groupCardinality the new cardinality
          */
@@ -172,7 +217,20 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         }
 
         /**
+         * Change first children group to cardinality group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, lowerBound, upperBound)}.
+         *
+         * @param lowerBound       the new lower bound
+         * @param upperBound       the new upper bound
+         */
+        default void toCardinalityGroup(int lowerBound, int upperBound) {
+            toCardinalityGroup(0, lowerBound, upperBound);
+        }
+
+        /**
          * Change first children group to and group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 0, Range.OPEN)}.
+         *
          */
         default void toAndGroup() {
             toAndGroup(0);
@@ -180,6 +238,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
 
         /**
          * Change first children group to alternative group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 1, Range.OPEN)}.
          */
         default void toAlternativeGroup() {
             toAlternativeGroup(0);
@@ -187,6 +246,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
 
         /**
          * Change first children group to or group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 1, 1)}.
          */
         default void toOrGroup() {
             toOrGroup(0);
