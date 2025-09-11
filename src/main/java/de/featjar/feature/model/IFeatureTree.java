@@ -160,7 +160,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         /**
          * Changes the cardinality of the children group with the given id.
          *
-         * @param groupId          the id of the group to change
+         * @param groupID          the id of the group to change
          * @param lowerBound       the new lower bound
          * @param upperBound       the new upper bound
          */
@@ -169,7 +169,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         /**
          * Changes the cardinality of the children group with the given id.
          *
-         * @param groupId          the id of the group to change
+         * @param groupID          the id of the group to change
          * @param groupCardinality the new cardinality
          */
         default void toCardinalityGroup(int groupID, Range groupCardinality) {
@@ -180,7 +180,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
          * Change children group to and group.
          * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 0, Range.OPEN)}.
          *
-         * @param groupId the id of the group to change
+         * @param groupID the id of the group to change
          */
         default void toAndGroup(int groupID) {
             toCardinalityGroup(groupID, 0, Range.OPEN);
@@ -190,7 +190,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
          * Change children group to or group.
          * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, Range.OPEN)}.
          *
-         * @param groupId the id of the group to change
+         * @param groupID the id of the group to change
          */
         default void toOrGroup(int groupID) {
             toCardinalityGroup(groupID, 1, Range.OPEN);
@@ -200,7 +200,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
          * Change children group to alternative group.
          * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, 1)}.
          *
-         * @param groupId the id of the group to change
+         * @param groupID the id of the group to change
          */
         default void toAlternativeGroup(int groupID) {
             toCardinalityGroup(groupID, 1, 1);
