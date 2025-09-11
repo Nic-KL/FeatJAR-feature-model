@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -245,8 +246,8 @@ public class Configuration implements Cloneable {
     protected Configuration(Configuration configuration) {
         variableMap = configuration.variableMap.clone();
         selections = new ArrayList<>(configuration.selections.size());
-        for (Selection<?> selection : selections) {
-            selections.add(selection.clone());
+        for (Selection<?> selection : configuration.selections) {
+            selections.add(selection != null ? selection.clone() : null);
         }
     }
 
@@ -380,7 +381,7 @@ public class Configuration implements Cloneable {
      * {@return a list of all features that have a manual and no automatic value}
      */
     public List<Selection<?>> getManualFeatures() {
-        return getFeatureStream()
+        return getSelectionStream()
                 .filter(f -> f.getAutomatic() == null && f.getManual() != null)
                 .collect(Collectors.toList());
     }
@@ -389,11 +390,11 @@ public class Configuration implements Cloneable {
      * {@return a list of all features that have a automatic value}
      */
     public List<Selection<?>> getAutomaticFeatures() {
-        return getFeatureStream().filter(f -> f.getAutomatic() != null).collect(Collectors.toList());
+        return getSelectionStream().filter(f -> f.getAutomatic() != null).collect(Collectors.toList());
     }
 
-    private Stream<Selection<?>> getFeatureStream() {
-        return selections.stream();
+    private Stream<Selection<?>> getSelectionStream() {
+        return selections.stream().filter(Objects::nonNull);
     }
 
     public Result<Selection<?>> getSelection(String name) {
@@ -415,21 +416,21 @@ public class Configuration implements Cloneable {
      * Turns all automatic into manual values.
      */
     public void makeManual() {
-        getFeatureStream().forEach(Selection::makeManual);
+        getSelectionStream().forEach(Selection::makeManual);
     }
 
     /**
      * Resets all values to undefined.
      */
     public void reset() {
-        getFeatureStream().forEach(Selection::reset);
+        getSelectionStream().forEach(Selection::reset);
     }
 
     /**
      * Resets all automatic values to undefined.
      */
     public void resetAutomatic() {
-        getFeatureStream().forEach(Selection::resetAutomatic);
+        getSelectionStream().forEach(Selection::resetAutomatic);
     }
 
     /**
@@ -438,7 +439,7 @@ public class Configuration implements Cloneable {
      * @param selection the selection to reset
      */
     public void resetAutomatic(Object selection) {
-        getFeatureStream().filter(f -> f.getAutomatic() == selection).forEach(Selection::resetAutomatic);
+        getSelectionStream().filter(f -> f.getAutomatic() == selection).forEach(Selection::resetAutomatic);
     }
 
     /**
@@ -461,6 +462,6 @@ public class Configuration implements Cloneable {
 
     @Override
     public String toString() {
-        return getFeatureStream().map(Selection::toString).collect(Collectors.joining("\n"));
+        return getSelectionStream().map(Selection::toString).collect(Collectors.joining("\n"));
     }
 }
