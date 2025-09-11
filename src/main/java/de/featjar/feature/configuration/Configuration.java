@@ -26,11 +26,11 @@ import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,86 +39,115 @@ import java.util.stream.Stream;
  */
 public class Configuration implements Cloneable {
 
-    public static final class FeatureNotFoundException extends RuntimeException {
-        private static final long serialVersionUID = -4112750233088590678L;
-    }
-
     public static final class IllegalSelectionTypeException extends RuntimeException {
         private static final long serialVersionUID = 1793844229871267311L;
 
-        public IllegalSelectionTypeException(SelectableFeature<?> feature, Object selection) {
+        public IllegalSelectionTypeException(Class<?> otherType, Class<?> thisType) {
             super(String.format(
-                    "Trying to set the value %s (of type %s) to the feature %s (of type %s)",
-                    String.valueOf(selection),
-                    String.valueOf(selection.getClass()),
-                    feature.getName(),
-                    feature.getType()));
+                    "Trying to set values of type %s to a feature of type %s",
+                    String.valueOf(otherType), String.valueOf(thisType)));
+        }
+
+        public IllegalSelectionTypeException(Selection<?> feature, Object selection) {
+            super(String.format(
+                    "Trying to set the value %s (of type %s) to a feature of type %s",
+                    String.valueOf(selection), String.valueOf(selection.getClass()), feature.getType()));
         }
     }
 
     public static final class SelectionNotPossibleException extends RuntimeException {
         private static final long serialVersionUID = 1793844229871267311L;
 
-        public SelectionNotPossibleException(String feature, Object selection) {
-            super(String.format("The feature \"%s\" cannot be set to %s", feature, String.valueOf(selection)));
+        public SelectionNotPossibleException(Object selection) {
+            super(String.format("Feature cannot be set to %s", String.valueOf(selection)));
         }
     }
 
-    public static class SelectableFeature<T> {
+    /**
+     * The value of a variable.
+     * Has an automatic and manual value, which can be set independently.
+     *
+     * @param <T> the type of possible values
+     */
+    public static class Selection<T> {
 
-        private final String name;
         private final Class<T> type;
         private T manual, automatic;
 
-        public SelectableFeature(String name, Class<T> type) {
-            this.name = name;
+        /**
+         * Constructs a new selection.
+         * @param type the type of the selection
+         */
+        public Selection(Class<T> type) {
             this.type = type;
         }
 
-        private SelectableFeature(SelectableFeature<T> oldSelectableFeature) {
-            name = oldSelectableFeature.name;
+        private Selection(Selection<T> oldSelectableFeature) {
             type = oldSelectableFeature.type;
         }
 
-        public String getName() {
-            return name;
-        }
-
+        /**
+         * {@return type of this selection}
+         */
         public Class<T> getType() {
             return type;
         }
 
-        public T get() {
+        /**
+         * {@return the combined automatic and manual selection}
+         * If an automatic value is set, this is returned. Otherwise the manual value is returned.
+         */
+        public T getSelection() {
             return automatic == null ? manual : automatic;
         }
 
+        /**
+         * {@return the manual selection}
+         */
         public T getManual() {
             return manual;
         }
 
+        /**
+         * {@return the automatic selection}
+         */
         public T getAutomatic() {
             return automatic;
         }
 
+        /**
+         * Sets the manual value.
+         * @param selection the value
+         *
+         * @throws IllegalSelectionTypeException if the given value is of a different type than this selection
+         * @throws SelectionNotPossibleException if the value contradicts the automatic value
+         */
         @SuppressWarnings("unchecked")
         public void setManual(Object selection) {
             checkIfSelectionPossible(selection, automatic);
             manual = (T) selection;
         }
 
+        /**
+         * Sets the automatic value.
+         * @param selection the value
+         *
+         * @throws IllegalSelectionTypeException if the given value is of a different type than this selection
+         * @throws SelectionNotPossibleException if the value contradicts the manual value
+         */
         @SuppressWarnings("unchecked")
         public void setAutomatic(Object selection) {
             checkIfSelectionPossible(selection, manual);
             automatic = (T) selection;
         }
 
-        public void checkIfSelectionPossible(Object selection, Object current) {
+        private void checkIfSelectionPossible(Object selection, Object current) {
             if (selection != null) {
                 if (!type.isInstance(selection)) {
                     throw new IllegalSelectionTypeException(this, selection);
                 }
                 if ((current != null) && (current != selection)) {
-                    throw new SelectionNotPossibleException(getName(), selection);
+                    throw new SelectionNotPossibleException(selection);
                 }
             }
         }
@@ -133,41 +162,62 @@ public class Configuration implements Cloneable {
             }
         }
 
+        /**
+         * Adopts the values from a given selection.
+         * @param selection the other selection
+         * @throws IllegalSelectionTypeException if the type of the given selection is different from this selection's type
+         */
+        @SuppressWarnings("unchecked")
+        public void adopt(Selection<?> selection) {
+            if (selection.type != type) {
+                throw new IllegalSelectionTypeException(selection.type, type);
+            }
+            manual = (T) selection.manual;
+            automatic = (T) selection.automatic;
+        }
+
+        /**
+         * Sets manual and automatic values to {@code null}.
+         */
         public void reset() {
             manual = null;
             automatic = null;
         }
-
+        /**
+         * Sets automatic value to {@code null}.
+         */
         public void resetAutomatic() {
             automatic = null;
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public SelectableFeature<T> clone() {
-            if (!this.getClass().equals(SelectableFeature.class)) {
+        public Selection<T> clone() {
+            if (!this.getClass().equals(Selection.class)) {
                 try {
-                    return (SelectableFeature<T>) super.clone();
+                    return (Selection<T>) super.clone();
                 } catch (final CloneNotSupportedException e) {
                     FeatJAR.log().error(e);
                     throw new RuntimeException("Cloning is not supported for " + this.getClass());
                 }
             }
-            SelectableFeature<T> selectableFeature = new SelectableFeature<>(this);
+            Selection<T> selectableFeature = new Selection<>(this);
             selectableFeature.manual = this.manual;
             selectableFeature.automatic = this.automatic;
             return selectableFeature;
         }
-
-        @Override
-        public String toString() {
-            return String.format("%s = %s", name, String.valueOf(get()));
-        }
     }
 
-    private final LinkedHashMap<String, SelectableFeature<?>> selectableFeatures = new LinkedHashMap<>();
+    private VariableMap variableMap;
+    private ArrayList<Selection<?>> selections;
 
-    public Configuration() {}
+    /**
+     * Creates an empty configuration.
+     */
+    public Configuration() {
+        variableMap = new VariableMap();
+        selections = new ArrayList<>();
+    }
 
     /**
      * Creates a configuration with the same features as the given feature model.
@@ -175,9 +225,15 @@ public class Configuration implements Cloneable {
      * @param featureModel the underlying feature model.
      */
     public Configuration(IFeatureModel featureModel) {
+        variableMap = new VariableMap();
+        selections = new ArrayList<>(featureModel.getNumberOfFeatures());
         for (final IFeature child : featureModel.getFeatures()) {
             String featureName = child.getName().get();
-            selectableFeatures.put(featureName, new SelectableFeature<>(featureName, child.getType()));
+            int index = variableMap.add(featureName);
+            for (int i = selections.size(); i <= index; i++) {
+                selections.add(null);
+            }
+            selections.add(index, new Selection<>(child.getType()));
         }
     }
 
@@ -187,8 +243,10 @@ public class Configuration implements Cloneable {
      * @param configuration The configuration to clone
      */
     protected Configuration(Configuration configuration) {
-        for (final Entry<String, SelectableFeature<?>> entry : configuration.selectableFeatures.entrySet()) {
-            selectableFeatures.put(entry.getKey(), entry.getValue().clone());
+        variableMap = configuration.variableMap.clone();
+        selections = new ArrayList<>(configuration.selections.size());
+        for (Selection<?> selection : selections) {
+            selections.add(selection.clone());
         }
     }
 
@@ -199,10 +257,8 @@ public class Configuration implements Cloneable {
      * @param variableMap mapping of variable names to indices. Is used to link a literal index in a {@link BooleanAssignment}.
      */
     public Configuration(BooleanAssignment booleanAssignment, VariableMap variableMap) {
-        for (final String variable : variableMap.getVariableNames()) {
-            SelectableFeature<Boolean> value = new SelectableFeature<>(variable, Boolean.class);
-            selectableFeatures.put(variable, value);
-        }
+        variableMap = variableMap.clone();
+        selections = new ArrayList<>(variableMap.maxIndex());
         adopt(booleanAssignment, variableMap);
     }
 
@@ -213,10 +269,46 @@ public class Configuration implements Cloneable {
      * @param variableMap maps the literals in the assignments to feature names
      */
     public void adopt(BooleanAssignment assignment, VariableMap variableMap) {
-        assignment.stream().filter(literal -> literal != 0).forEach(literal -> variableMap
-                .get(Math.abs(literal))
-                .flatMap(this::getSelectableFeature)
-                .ifPresent(f -> f.setManual(literal > 0)));
+        for (int literal : assignment.get()) {
+            if (literal != 0) {
+                int adapedLiteral = variableMap.adapt(literal, this.variableMap, true);
+                if (adapedLiteral != 0) {
+                    int index = Math.abs(adapedLiteral);
+                    for (int i = selections.size(); i <= index; i++) {
+                        selections.add(null);
+                    }
+                    Selection<?> selection = selections.get(index);
+                    if (selection == null) {
+                        selection = new Selection<>(Boolean.class);
+                        selections.add(index, selection);
+                    }
+                    selection.setManual(adapedLiteral > 0);
+                }
+            }
+        }
+    }
+
+    /**
+     * Adopts the values from this assignment.
+     * Assumes that the variable map of the given assignment is the same as in this configuration.
+     *
+     * @param assignment the assignment to adopt
+     */
+    public void adopt(BooleanAssignment assignment) {
+        for (int literal : assignment.get()) {
+            if (literal != 0) {
+                int index = Math.abs(literal);
+                for (int i = selections.size(); i <= index; i++) {
+                    selections.add(null);
+                }
+                Selection<?> selection = selections.get(index);
+                if (selection == null) {
+                    selection = new Selection<>(Boolean.class);
+                    selections.add(index, selection);
+                }
+                selection.setManual(literal > 0);
+            }
+        }
     }
 
     /**
@@ -226,32 +318,68 @@ public class Configuration implements Cloneable {
      * @param configuration the configuration to adopt
      */
     public void adopt(Configuration configuration) {
-        for (final Entry<String, SelectableFeature<?>> entry : configuration.selectableFeatures.entrySet()) {
-            getSelectableFeature(entry.getKey()).ifPresent(f -> {
-                f.setManual(entry.getValue().manual);
-                f.setAutomatic(entry.getValue().automatic);
-            });
+        ListIterator<Selection<?>> it = configuration.selections.listIterator();
+        while (it.hasNext()) {
+            Selection<?> otherSelection = it.next();
+            if (otherSelection != null) {
+                int adapedIndex = configuration.variableMap.adapt(it.previousIndex(), variableMap, true);
+                if (adapedIndex != 0) {
+                    for (int i = selections.size(); i <= adapedIndex; i++) {
+                        selections.add(null);
+                    }
+                    Selection<?> selection = selections.get(adapedIndex);
+                    if (selection == null) {
+                        selection = otherSelection.clone();
+                        selections.add(adapedIndex, selection);
+                    } else {
+                        selection.adopt(otherSelection);
+                    }
+                }
+            }
         }
     }
 
-    public List<SelectableFeature<?>> select(Collection<String> features) {
+    public List<Selection<?>> select(Collection<String> features) {
         return select(features.stream()).collect(Collectors.toList());
     }
 
-    public Stream<SelectableFeature<?>> select(Stream<String> features) {
-        return features.map(this::getSelectableFeature)
-                .filter(Result::isPresent)
-                .map(Result::get);
+    public Stream<Selection<?>> select(Stream<String> features) {
+        return features.map(this::getSelection).filter(Result::isPresent).map(Result::get);
     }
 
-    public Collection<SelectableFeature<?>> getSelectableFeatures() {
-        return Collections.unmodifiableCollection(selectableFeatures.values());
+    public VariableMap getVariableMap() {
+        return variableMap;
+    }
+
+    public void adapt(VariableMap newVariableMap) {
+        ArrayList<Selection<?>> newSelections = new ArrayList<>(selections.size());
+        ListIterator<Selection<?>> it = selections.listIterator();
+        while (it.hasNext()) {
+            Selection<?> otherSelection = it.next();
+            if (otherSelection != null) {
+                int adapedIndex = variableMap.adapt(it.previousIndex(), newVariableMap, true);
+                if (adapedIndex != 0) {
+                    for (int i = selections.size(); i <= adapedIndex; i++) {
+                        newSelections.add(null);
+                    }
+                    newSelections.add(adapedIndex, otherSelection.clone());
+                }
+            }
+        }
+        selections.clear();
+        selections.addAll(newSelections);
+        newSelections.clear();
+        this.variableMap = newVariableMap;
+    }
+
+    public List<Selection<?>> getSelections() {
+        return Collections.unmodifiableList(selections);
     }
 
     /**
      * {@return a list of all features that have a manual and no automatic value}
      */
-    public List<SelectableFeature<?>> getManualFeatures() {
+    public List<Selection<?>> getManualFeatures() {
         return getFeatureStream()
                 .filter(f -> f.getAutomatic() == null && f.getManual() != null)
                 .collect(Collectors.toList());
@@ -260,52 +388,48 @@ public class Configuration implements Cloneable {
     /**
      * {@return a list of all features that have a automatic value}
      */
-    public List<SelectableFeature<?>> getAutomaticFeatures() {
+    public List<Selection<?>> getAutomaticFeatures() {
         return getFeatureStream().filter(f -> f.getAutomatic() != null).collect(Collectors.toList());
     }
 
-    private Stream<SelectableFeature<?>> getFeatureStream() {
-        return selectableFeatures.entrySet().stream().map(Entry::getValue);
+    private Stream<Selection<?>> getFeatureStream() {
+        return selections.stream();
     }
 
-    public Result<SelectableFeature<?>> getSelectableFeature(String name) {
-        return Result.ofNullable(name).map(selectableFeatures::get);
+    public Result<Selection<?>> getSelection(String name) {
+        return Result.ofNullable(name).flatMap(variableMap::get).map(selections::get);
     }
 
-    public SelectableFeature<?> get(String name) {
-        return Result.ofNullable(name).map(selectableFeatures::get).orElseThrow();
+    public Selection<?> get(String name) {
+        return getSelection(name).orElseThrow();
     }
 
-    public Result<SelectableFeature<?>> getSelectableFeature(IFeature feature) {
-        return feature.getName().<SelectableFeature<?>>map(selectableFeatures::get);
-    }
-
-    public List<String> getFeatureNames(final Object selection) {
-        return getFeatureStream()
-                .filter(f -> f.get() == selection)
-                .map(SelectableFeature::getName)
-                .collect(Collectors.toList());
+    public Result<Selection<?>> getSelection(IFeature feature) {
+        return Result.ofNullable(feature)
+                .flatMap(IFeature::getName)
+                .flatMap(variableMap::get)
+                .map(selections::get);
     }
 
     /**
      * Turns all automatic into manual values.
      */
     public void makeManual() {
-        getFeatureStream().forEach(SelectableFeature::makeManual);
+        getFeatureStream().forEach(Selection::makeManual);
     }
 
     /**
      * Resets all values to undefined.
      */
     public void reset() {
-        getFeatureStream().forEach(SelectableFeature::reset);
+        getFeatureStream().forEach(Selection::reset);
     }
 
     /**
      * Resets all automatic values to undefined.
      */
     public void resetAutomatic() {
-        getFeatureStream().forEach(SelectableFeature::resetAutomatic);
+        getFeatureStream().forEach(Selection::resetAutomatic);
     }
 
     /**
@@ -314,7 +438,7 @@ public class Configuration implements Cloneable {
      * @param selection the selection to reset
      */
     public void resetAutomatic(Object selection) {
-        getFeatureStream().filter(f -> f.getAutomatic() == selection).forEach(SelectableFeature::resetAutomatic);
+        getFeatureStream().filter(f -> f.getAutomatic() == selection).forEach(Selection::resetAutomatic);
     }
 
     /**
@@ -337,6 +461,6 @@ public class Configuration implements Cloneable {
 
     @Override
     public String toString() {
-        return getFeatureStream().map(SelectableFeature::toString).collect(Collectors.joining("\n"));
+        return getFeatureStream().map(Selection::toString).collect(Collectors.joining("\n"));
     }
 }

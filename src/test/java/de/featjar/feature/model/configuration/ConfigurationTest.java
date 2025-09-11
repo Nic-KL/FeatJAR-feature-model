@@ -22,13 +22,12 @@ package de.featjar.feature.model.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.base.data.identifier.Identifiers;
 import de.featjar.feature.configuration.Configuration;
-import de.featjar.feature.configuration.Configuration.SelectableFeature;
+import de.featjar.feature.configuration.Configuration.Selection;
 import de.featjar.feature.configuration.Configuration.SelectionNotPossibleException;
 import de.featjar.feature.model.FeatureModel;
 import de.featjar.feature.model.IFeature;
@@ -97,13 +96,9 @@ public class ConfigurationTest {
 
     @Test
     public void testfeatureModelToConfigurationAsSet() {
-        for (SelectableFeature<?> feature : configuration.getSelectableFeatures()) {
-            assertFalse(featureModel.getFeature(feature.getName()).isEmpty());
-        }
         for (IFeature feature : featureModel.getFeatures()) {
-            assertFalse(configuration
-                    .getSelectableFeature(feature.getName().orElseThrow())
-                    .isEmpty());
+            assertFalse(
+                    configuration.getSelection(feature.getName().orElseThrow()).isEmpty());
         }
     }
 
@@ -154,152 +149,140 @@ public class ConfigurationTest {
         Configuration configurationForCloning = new Configuration(featureModelForCloning);
 
         // selection setup
-        configurationForCloning.getSelectableFeature("root").orElseThrow().setManual(Boolean.TRUE);
-        configurationForCloning.getSelectableFeature("Test1").orElseThrow().setAutomatic(Boolean.TRUE);
-        configurationForCloning.getSelectableFeature("Test2").orElseThrow().setManual(Boolean.TRUE);
-        configurationForCloning.getSelectableFeature("Test3").orElseThrow().setAutomatic(Boolean.FALSE);
-        configurationForCloning.getSelectableFeature("Test4").orElseThrow().setManual(Boolean.FALSE);
+        configurationForCloning.getSelection("root").orElseThrow().setManual(Boolean.TRUE);
+        configurationForCloning.getSelection("Test1").orElseThrow().setAutomatic(Boolean.TRUE);
+        configurationForCloning.getSelection("Test2").orElseThrow().setManual(Boolean.TRUE);
+        configurationForCloning.getSelection("Test3").orElseThrow().setAutomatic(Boolean.FALSE);
+        configurationForCloning.getSelection("Test4").orElseThrow().setManual(Boolean.FALSE);
 
         // execute clone()
         Configuration clonedConfiguration = configurationForCloning.clone();
 
-        // check all selectable features
-        for (SelectableFeature<?> originalFeature : configurationForCloning.getSelectableFeatures()) {
-            assertNotNull(clonedConfiguration.getSelectableFeature(originalFeature.getName()));
-        }
-
         // check whether the selections of the clonedConfiguration are the same as for configurationForCloning
         assertEquals(
                 Boolean.TRUE,
-                clonedConfiguration.getSelectableFeature("root").orElseThrow().getManual());
+                clonedConfiguration.getSelection("root").orElseThrow().getManual());
         assertEquals(
                 Boolean.TRUE,
-                clonedConfiguration.getSelectableFeature("Test1").orElseThrow().getAutomatic());
+                clonedConfiguration.getSelection("Test1").orElseThrow().getAutomatic());
         assertEquals(
                 Boolean.TRUE,
-                clonedConfiguration.getSelectableFeature("Test2").orElseThrow().getManual());
+                clonedConfiguration.getSelection("Test2").orElseThrow().getManual());
 
         assertEquals(
                 Boolean.FALSE,
-                clonedConfiguration.getSelectableFeature("Test3").orElseThrow().getAutomatic());
+                clonedConfiguration.getSelection("Test3").orElseThrow().getAutomatic());
         assertEquals(
                 Boolean.FALSE,
-                clonedConfiguration.getSelectableFeature("Test4").orElseThrow().getManual());
+                clonedConfiguration.getSelection("Test4").orElseThrow().getManual());
 
         assertEquals(
-                null,
-                clonedConfiguration.getSelectableFeature("Test5").orElseThrow().get());
+                null, clonedConfiguration.getSelection("Test5").orElseThrow().getSelection());
         assertEquals(
-                null,
-                clonedConfiguration.getSelectableFeature("Test6").orElseThrow().get());
+                null, clonedConfiguration.getSelection("Test6").orElseThrow().getSelection());
         assertEquals(
-                null,
-                clonedConfiguration.getSelectableFeature("Test7").orElseThrow().get());
+                null, clonedConfiguration.getSelection("Test7").orElseThrow().getSelection());
     }
 
     @Test
     public void testSelectionAttributesSetterAndGetterOfAutomaticAndManual() {
-        SelectableFeature<Boolean> testFeature = new SelectableFeature<>("testFeature", Boolean.class);
+        Selection<Boolean> testSelection = new Selection<>(Boolean.class);
 
         // Initial state
-        assertEquals(null, testFeature.getAutomatic());
-        assertEquals(null, testFeature.getManual());
+        assertEquals(null, testSelection.getAutomatic());
+        assertEquals(null, testSelection.getManual());
 
         // Test manual selection to SELECTED
-        testFeature.setManual(Boolean.TRUE);
-        assertEquals(null, testFeature.getAutomatic());
-        assertEquals(Boolean.TRUE, testFeature.getManual());
+        testSelection.setManual(Boolean.TRUE);
+        assertEquals(null, testSelection.getAutomatic());
+        assertEquals(Boolean.TRUE, testSelection.getManual());
         assertThrows(SelectionNotPossibleException.class, () -> {
-            testFeature.setAutomatic(Boolean.FALSE);
+            testSelection.setAutomatic(Boolean.FALSE);
         });
-        testFeature.setManual(null);
+        testSelection.setManual(null);
 
         // Test automatic selection to SELECTED
-        testFeature.setAutomatic(Boolean.TRUE);
-        assertEquals(Boolean.TRUE, testFeature.getAutomatic());
-        assertEquals(null, testFeature.getManual());
+        testSelection.setAutomatic(Boolean.TRUE);
+        assertEquals(Boolean.TRUE, testSelection.getAutomatic());
+        assertEquals(null, testSelection.getManual());
         assertThrows(SelectionNotPossibleException.class, () -> {
-            testFeature.setManual(Boolean.FALSE);
+            testSelection.setManual(Boolean.FALSE);
         });
-        testFeature.setAutomatic(null);
+        testSelection.setAutomatic(null);
 
         // Test manual selection to UNSELECTED
-        testFeature.setManual(Boolean.FALSE);
-        assertEquals(null, testFeature.getAutomatic());
-        assertEquals(Boolean.FALSE, testFeature.getManual());
+        testSelection.setManual(Boolean.FALSE);
+        assertEquals(null, testSelection.getAutomatic());
+        assertEquals(Boolean.FALSE, testSelection.getManual());
         assertThrows(SelectionNotPossibleException.class, () -> {
-            testFeature.setAutomatic(Boolean.TRUE);
+            testSelection.setAutomatic(Boolean.TRUE);
         });
-        testFeature.setManual(null);
+        testSelection.setManual(null);
 
         // Test automatic selection to UNSELECTED
-        testFeature.setAutomatic(Boolean.FALSE);
-        assertEquals(Boolean.FALSE, testFeature.getAutomatic());
-        assertEquals(null, testFeature.getManual());
+        testSelection.setAutomatic(Boolean.FALSE);
+        assertEquals(Boolean.FALSE, testSelection.getAutomatic());
+        assertEquals(null, testSelection.getManual());
         assertThrows(SelectionNotPossibleException.class, () -> {
-            testFeature.setManual(Boolean.TRUE);
+            testSelection.setManual(Boolean.TRUE);
         });
-        testFeature.setAutomatic(null);
+        testSelection.setAutomatic(null);
 
         // Test setting both manual and automatic to SELECTED
-        testFeature.setManual(Boolean.TRUE);
-        testFeature.setAutomatic(Boolean.TRUE);
-        assertEquals(Boolean.TRUE, testFeature.getManual());
-        assertEquals(Boolean.TRUE, testFeature.getAutomatic());
-        testFeature.setManual(null);
-        testFeature.setAutomatic(null);
+        testSelection.setManual(Boolean.TRUE);
+        testSelection.setAutomatic(Boolean.TRUE);
+        assertEquals(Boolean.TRUE, testSelection.getManual());
+        assertEquals(Boolean.TRUE, testSelection.getAutomatic());
+        testSelection.setManual(null);
+        testSelection.setAutomatic(null);
 
         // Test setting both manual and automatic to UNSELECTED
-        testFeature.setManual(Boolean.FALSE);
-        testFeature.setAutomatic(Boolean.FALSE);
-        assertEquals(Boolean.FALSE, testFeature.getManual());
-        assertEquals(Boolean.FALSE, testFeature.getAutomatic());
-        testFeature.setManual(null);
-        testFeature.setAutomatic(null);
+        testSelection.setManual(Boolean.FALSE);
+        testSelection.setAutomatic(Boolean.FALSE);
+        assertEquals(Boolean.FALSE, testSelection.getManual());
+        assertEquals(Boolean.FALSE, testSelection.getAutomatic());
+        testSelection.setManual(null);
+        testSelection.setAutomatic(null);
     }
 
     @Test
     public void testSelectionAttributesSetterAndGetterOfAutomaticAndManualFromATestConfiguration() {
         Configuration testConfiguration = configuration.clone();
 
-        assertEquals(
-                null,
-                testConfiguration.getSelectableFeature("Test1").orElseThrow().getAutomatic());
-        assertEquals(
-                null,
-                testConfiguration.getSelectableFeature("Test2").orElseThrow().getManual());
+        assertEquals(null, testConfiguration.getSelection("Test1").orElseThrow().getAutomatic());
+        assertEquals(null, testConfiguration.getSelection("Test2").orElseThrow().getManual());
 
         testConfiguration.get("Test1").setAutomatic(Boolean.TRUE);
         testConfiguration.get("Test2").setManual(Boolean.TRUE);
 
         assertEquals(
                 Boolean.TRUE,
-                testConfiguration.getSelectableFeature("Test1").orElseThrow().getAutomatic());
+                testConfiguration.getSelection("Test1").orElseThrow().getAutomatic());
         assertEquals(
                 Boolean.TRUE,
-                testConfiguration.getSelectableFeature("Test2").orElseThrow().getManual());
+                testConfiguration.getSelection("Test2").orElseThrow().getManual());
         assertEquals(
                 Boolean.TRUE,
-                testConfiguration.getSelectableFeature("Test1").orElseThrow().get());
+                testConfiguration.getSelection("Test1").orElseThrow().getSelection());
         assertEquals(
                 Boolean.TRUE,
-                testConfiguration.getSelectableFeature("Test2").orElseThrow().get());
+                testConfiguration.getSelection("Test2").orElseThrow().getSelection());
 
         testConfiguration.get("Test1").setAutomatic(Boolean.FALSE);
         testConfiguration.get("Test2").setManual(Boolean.FALSE);
 
         assertEquals(
                 Boolean.FALSE,
-                testConfiguration.getSelectableFeature("Test1").orElseThrow().getAutomatic());
+                testConfiguration.getSelection("Test1").orElseThrow().getAutomatic());
         assertEquals(
                 Boolean.FALSE,
-                testConfiguration.getSelectableFeature("Test2").orElseThrow().getManual());
+                testConfiguration.getSelection("Test2").orElseThrow().getManual());
         assertEquals(
                 Boolean.FALSE,
-                testConfiguration.getSelectableFeature("Test1").orElseThrow().get());
+                testConfiguration.getSelection("Test1").orElseThrow().getSelection());
         assertEquals(
                 Boolean.FALSE,
-                testConfiguration.getSelectableFeature("Test2").orElseThrow().get());
+                testConfiguration.getSelection("Test2").orElseThrow().getSelection());
     }
 
     @Test
@@ -315,26 +298,18 @@ public class ConfigurationTest {
         testConfiguration.get("Test4").setManual(Boolean.FALSE);
 
         // check all SELECTED features in LinkedHashMap selectableFeatures
-        assertEquals("root", testConfiguration.get("root").getName());
-        assertEquals(Boolean.TRUE, testConfiguration.get("root").get());
-        assertEquals("Test1", testConfiguration.get("Test1").getName());
-        assertEquals(Boolean.TRUE, testConfiguration.get("Test1").get());
-        assertEquals("Test2", testConfiguration.get("Test2").getName());
-        assertEquals(Boolean.TRUE, testConfiguration.get("Test2").get());
+        assertEquals(Boolean.TRUE, testConfiguration.get("root").getSelection());
+        assertEquals(Boolean.TRUE, testConfiguration.get("Test1").getSelection());
+        assertEquals(Boolean.TRUE, testConfiguration.get("Test2").getSelection());
 
         // check all UNSELECTED features in LinkedHashMap selectableFeatures
-        assertEquals("Test3", testConfiguration.get("Test3").getName());
-        assertEquals(Boolean.FALSE, testConfiguration.get("Test3").get());
-        assertEquals("Test4", testConfiguration.get("Test4").getName());
-        assertEquals(Boolean.FALSE, testConfiguration.get("Test4").get());
+        assertEquals(Boolean.FALSE, testConfiguration.get("Test3").getSelection());
+        assertEquals(Boolean.FALSE, testConfiguration.get("Test4").getSelection());
 
         // check all UNDEFINED features in LinkedHashMap selectableFeatures
-        assertEquals("Test5", testConfiguration.get("Test5").getName());
-        assertEquals(null, testConfiguration.get("Test5").get());
-        assertEquals("Test6", testConfiguration.get("Test6").getName());
-        assertEquals(null, testConfiguration.get("Test6").get());
-        assertEquals("Test7", testConfiguration.get("Test7").getName());
-        assertEquals(null, testConfiguration.get("Test7").get());
+        assertEquals(null, testConfiguration.get("Test5").getSelection());
+        assertEquals(null, testConfiguration.get("Test6").getSelection());
+        assertEquals(null, testConfiguration.get("Test7").getSelection());
 
         // execute resetValues
         testConfiguration.reset();
@@ -343,14 +318,14 @@ public class ConfigurationTest {
         assertTrue(testConfiguration.getManualFeatures().isEmpty());
         assertTrue(testConfiguration.getAutomaticFeatures().isEmpty());
 
-        assertEquals(null, testConfiguration.get("root").get());
-        assertEquals(null, testConfiguration.get("Test1").get());
-        assertEquals(null, testConfiguration.get("Test2").get());
-        assertEquals(null, testConfiguration.get("Test3").get());
-        assertEquals(null, testConfiguration.get("Test4").get());
-        assertEquals(null, testConfiguration.get("Test5").get());
-        assertEquals(null, testConfiguration.get("Test6").get());
-        assertEquals(null, testConfiguration.get("Test7").get());
+        assertEquals(null, testConfiguration.get("root").getSelection());
+        assertEquals(null, testConfiguration.get("Test1").getSelection());
+        assertEquals(null, testConfiguration.get("Test2").getSelection());
+        assertEquals(null, testConfiguration.get("Test3").getSelection());
+        assertEquals(null, testConfiguration.get("Test4").getSelection());
+        assertEquals(null, testConfiguration.get("Test5").getSelection());
+        assertEquals(null, testConfiguration.get("Test6").getSelection());
+        assertEquals(null, testConfiguration.get("Test7").getSelection());
     }
 
     @Test

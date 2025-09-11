@@ -27,7 +27,7 @@ import de.featjar.base.io.format.IFormat;
 import de.featjar.base.io.format.ParseProblem;
 import de.featjar.base.io.input.AInputMapper;
 import de.featjar.feature.configuration.Configuration;
-import de.featjar.feature.configuration.Configuration.SelectableFeature;
+import de.featjar.feature.configuration.Configuration.Selection;
 import de.featjar.feature.configuration.Configuration.SelectionNotPossibleException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class FeatureIDEFormat implements IFormat<Configuration> {
 
                     final String name = line.substring(2);
 
-                    final Result<SelectableFeature<?>> feature = configuration.getSelectableFeature(name);
+                    final Result<Selection<?>> feature = configuration.getSelection(name);
                     if (feature.isEmpty()) {
                         warnings.add(new ParseProblem(name, Severity.ERROR, lineNumber));
                     } else {
@@ -134,10 +134,11 @@ public class FeatureIDEFormat implements IFormat<Configuration> {
         buffer.append("# 0 = deselected, 1 = selected, 2 = undefined");
         buffer.append(NEWLINE);
 
-        for (final SelectableFeature<?> feature : configuration.getSelectableFeatures()) {
-            buffer.append(Integer.toString(getSelectionCode((Boolean) feature.getManual())));
-            buffer.append(Integer.toString(getSelectionCode((Boolean) feature.getAutomatic())));
-            buffer.append(feature.getName());
+        for (final String name : configuration.getVariableMap().getVariableNames()) {
+            Selection<?> selection = configuration.get(name);
+            buffer.append(Integer.toString(getSelectionCode((Boolean) selection.getManual())));
+            buffer.append(Integer.toString(getSelectionCode((Boolean) selection.getAutomatic())));
+            buffer.append(name);
             buffer.append(NEWLINE);
         }
 
