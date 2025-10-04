@@ -1,10 +1,13 @@
 package de.featjar.feature.model;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.feature.model.io.FeatureModelFormats;
+import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
 public class LoadFeatureModel extends LoadShellCommand {
 
@@ -19,19 +22,12 @@ public class LoadFeatureModel extends LoadShellCommand {
         	Shell.readCommand("Enter a path to load a FeatureModel:").orElse("");
         
         if(path.isBlank()) {
-        	System.out.println("No FeatureModel specified");
+        	FeatJAR.log().info("No FeatureModel specified");
         	return;
         }
-
-		session.put(name, 
-				loadAFormat(
-						Paths.get(path), FeatureModelFormats.getInstance()), FeatureModel.class);
-		
-		
-//		session.put(setName().orElse("fm" + (session.elements.size() + 1)), 
-//				loadAFormat(
-//						Paths.get(Shell.readCommand("Enter a vaild path to load a FeatureModel:\n")
-//						.orElse("")), FeatureModelFormats.getInstance()), FeatureModel.class);
+        
+		saveModel(loadFormat(
+				Paths.get(path), FeatureModelFormats.getInstance()), name, session);
 	}		
     @Override
     public Optional<String> getShortName() {

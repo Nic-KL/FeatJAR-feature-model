@@ -13,8 +13,7 @@ public class ShellSession {
 		public StoredElement(Class<T> type, T element) {
 			this.type = type;
 			this.element = element;
-		}
-		
+		}		
 	}
 	
 	private final Map<String, StoredElement<?>> elements;	
@@ -33,9 +32,9 @@ public class ShellSession {
 		}
 	}	
 	
-	public Optional<String> getType(String key) {
-		return Optional.ofNullable(elements.get(key)).map(e -> e.type.getSimpleName());
-	}
+//	public Optional<String> getType(String key) {
+//		return Optional.ofNullable(elements.get(key)).map(e -> e.type.getSimpleName());
+//	}
 	
 	public Optional<Object> getElement(String key) {
 		return Optional.ofNullable(elements.get(key)).map(e -> e.element);
@@ -61,13 +60,13 @@ public class ShellSession {
 		return elements.size();
 	}
 	
-	public Optional<?> getKeySet() {
-		return Optional.of(elements.keySet());
-	}
 	
-	public void printKeySet() {
+	public void printVariables() {
 		// TODO sort, group (type or name)
-		elements.keySet().forEach(ks -> System.out.println(ks + " (" + getType(ks).orElse("?") + ")"));
+//		elements.keySet().forEach(ks -> System.out.println(ks + " (" + getType(ks).orElse("?") + ")"));
+		
+		elements.entrySet().forEach(m -> System.out.println(m.getKey() + "   (" 
+		+ m.getValue().type.getSimpleName() + ")" ));
 		// TODO use always entrySet
 //		elements.keySet().stream().map(s -> getType(s).orElse("?")).sorted().forEach(s -> System.out.println(s));
 	}

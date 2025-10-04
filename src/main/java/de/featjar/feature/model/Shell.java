@@ -11,6 +11,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Problem.Severity;
 import de.featjar.base.data.Result;
+import de.featjar.base.log.Log.Verbosity;
 
 public class Shell {
 
@@ -19,7 +20,7 @@ public class Shell {
 	private static final Scanner shellScanner = new Scanner(System.in);
 
 	private Shell() {
-		FeatJAR.initialize(); // TODO perhaps configure logger 
+		FeatJAR.initialize(FeatJAR.shellConfiguration());				
 		printArt();		
 		new HelpShellCommand().execute(session, null);		
 		run();
@@ -57,7 +58,7 @@ public class Shell {
 
 		if (commands.size() > 1) {
 			FeatJAR.log().info("Command name " + commandString + " is ambiguous! Found " + commands.size() + " commands: ");
-			commands.forEach(c -> System.out.println(c.getShortName().get() + " - " + c.getDescription().get()));
+			commands.forEach(c -> FeatJAR.log().info(c.getShortName().get() + " - " + c.getDescription().get()));
 			return Result.empty(addProblem(Severity.ERROR,
 					"Command name '%s' is ambiguous! It matches the following commands: \n%s", commandString,
 					commands.stream().map(IShellCommand::getIdentifier).collect(Collectors.joining("\n"))));
@@ -83,17 +84,17 @@ public class Shell {
 	
 	//TODO use lambdas etc to add better custom prompt with inheritance
 	public static Optional<String> readCommand(String prompt) {
-		System.out.println(prompt);
+		FeatJAR.log().info(prompt);
 		String input = shellScanner.nextLine().trim();
 		return input.isEmpty() ? Optional.empty() : Optional.of(input);
 	}
 
 	public static void printArt() {
-		System.out.println(" _____             _       _    _     ____   ____   _            _  _ ");
-		System.out.println("|  ___|___   __ _ | |_    | |  / \\   |  _ \\ / ___| | |__    ___ | || |");
-		System.out.println("| |_  / _ \\ / _` || __|_  | | / _ \\  | |_) |\\___ \\ | '_ \\  / _ \\| || |");
-		System.out.println("|  _||  __/| (_| || |_| |_| |/ ___ \\ |  _ <  ___) || | | ||  __/| || |");
-		System.out.println("|_|   \\___| \\__,_| \\__|\\___//_/   \\_\\|_| \\_\\|____/ |_| |_| \\___||_||_|");
-		System.out.println("");
+		FeatJAR.log().info(" _____             _       _    _     ____   ____   _            _  _ ");
+		FeatJAR.log().info("|  ___|___   __ _ | |_    | |  / \\   |  _ \\ / ___| | |__    ___ | || |");
+		FeatJAR.log().info("| |_  / _ \\ / _` || __|_  | | / _ \\  | |_) |\\___ \\ | '_ \\  / _ \\| || |");
+		FeatJAR.log().info("|  _||  __/| (_| || |_| |_| |/ ___ \\ |  _ <  ___) || | | ||  __/| || |");
+		FeatJAR.log().info("|_|   \\___| \\__,_| \\__|\\___//_/   \\_\\|_| \\_\\|____/ |_| |_| \\___||_||_|");
+		FeatJAR.log().info("");
 	}
 }
