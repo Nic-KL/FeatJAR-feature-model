@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import de.featjar.base.FeatJAR;
 import de.featjar.base.io.IO;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
@@ -39,56 +40,58 @@ public class StoreShellCommand implements IShellCommand {
 		
         cmdParams.forEach(e -> {
             session.getElement(e).ifPresent(element -> {
-//                System.out.println(FeatureModel.class + " " + element.getClass().toString() + " " + session.getType(e));
-                if (FeatureModel.class.isAssignableFrom(element.getClass())) {
-                    session.get(e, FeatureModel.class).ifPresent(v -> {
-                        try {
-                            IO.save(v, path.resolve(e), new StringFeatureModelIFormat());
-                            System.out.println("Storing of " + e +" Successful");
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    });
-                } else if (IFormula.class.isAssignableFrom(element.getClass())){
-                    session.get(e, IFormula.class).ifPresent(v -> {
-                        try {
-                            IO.save(v, path.resolve(e), new StringFormulaFormat());
-                            System.out.println("Storing of " + e +" Successful");
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    });
+//                FeatJAR.log().info(FeatureModel.class + " " + element.getClass().toString() + " " + session.getType(e));
+                if (FeatureModel.class.isAssignableFrom(element.getClass())) {                	
+                	try {
+                        IO.save((FeatureModel) element, path.resolve(e), new StringFeatureModelIFormat());
+                        storingMessage(e);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }           	
+//                    session.get(e, FeatureModel.class).ifPresent(v -> {
+//                        try {
+//                            IO.save(v, path.resolve(e), new StringFeatureModelIFormat());
+//                            storingMessage(e);
+//                        } catch (IOException ioe) {
+//                            ioe.printStackTrace();
+//                        }
+//                    });
+                } else if (IFormula.class.isAssignableFrom(element.getClass())){          	
+                	try {
+                        IO.save((IFormula) element, path.resolve(e), new StringFormulaFormat());
+                        storingMessage(e);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }                	
                 } else if (BooleanAssignment.class.isAssignableFrom(element.getClass())){
-                    session.get(e, BooleanAssignment.class).ifPresent(v -> {
-                        try {
-                            IO.save(v, path.resolve(e), new BooleanAssignmentString());
-                            System.out.println("Storing of " + e +" Successful");
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    });
+                	try {
+                        IO.save((BooleanAssignment) element, path.resolve(e), new BooleanAssignmentString());
+                        storingMessage(e);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }           
                 } else if (BooleanAssignmentList.class.isAssignableFrom(element.getClass())){
-                    session.get(e, BooleanAssignmentList.class).ifPresent(v -> {
-                        try {
-                            IO.save(v, path.resolve(e), new BooleanAssignmentListString());
-                            System.out.println("Storing of " + e +" Successful");
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    });
+                	try {
+                        IO.save((BooleanAssignmentList) element, path.resolve(e), new BooleanAssignmentListString());
+                        storingMessage(e);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }   
                 } else if (BooleanAssignmentGroups.class.isAssignableFrom(element.getClass())){
-                    session.get(e, BooleanAssignmentGroups.class).ifPresent(v -> {
-                        try {
-                            IO.save(v, path.resolve(e), new BooleanAssignmentGroupsString());
-                            System.out.println("Storing of " + e +" Successful");
-                        } catch (IOException ioe) {
-                            ioe.printStackTrace();
-                        }
-                    });
+                	try {
+                        IO.save((BooleanAssignmentGroups) element, path.resolve(e), new BooleanAssignmentGroupsString());
+                        storingMessage(e);
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }   
                 }
             });
         });
 
+	}
+	
+	private void storingMessage(String element) {
+        FeatJAR.log().info("Storing of " + element +" Successful");
 	}
 	
     @Override

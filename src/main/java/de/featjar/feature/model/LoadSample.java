@@ -4,6 +4,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
+import de.featjar.base.FeatJAR;
+import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
@@ -20,15 +22,18 @@ public class LoadSample extends LoadShellCommand {
         	Shell.readCommand("Enter a path to load a Sample:").orElse("");
         
         if(path.isBlank()) {
-        	System.out.println("No Sample specified");
+        	FeatJAR.log().info("No Sample specified");
         	return;
         }
+        
+		saveModel(loadFormat(
+				Paths.get(path), BooleanAssignmentGroupsFormats.getInstance()), name, session);
 
-		session.put(name, 
-				loadAFormat(
-						Paths.get(path), 
-						BooleanAssignmentGroupsFormats.getInstance()).getFirstGroup(), 
-						BooleanAssignmentList.class);
+//		session.put(name, 
+//				loadFormat(
+//						Paths.get(path), 
+//						BooleanAssignmentGroupsFormats.getInstance()).get().getFirstGroup(), 
+//						BooleanAssignmentList.class);
 		
 //		session.sampleList.put(setName().orElse("sample" + (session.sampleList.size() + 1)), 
 //		loadAFormat(

@@ -12,33 +12,33 @@ public class DeleteShellCommand implements IShellCommand {
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
-		
-		if(cmdParams.isEmpty()) {
+
+		if (cmdParams.isEmpty()) {
 			cmdParams = Shell.readCommand("Enter the variable names you want to delete:")
-				    .map(c -> Arrays.stream(c.split("\\s+")).collect(Collectors.toList()))
-				    .orElse(Collections.emptyList());
+					.map(c -> Arrays.stream(c.split("\\s+")).collect(Collectors.toList()))
+					.orElse(Collections.emptyList());
 		}
-		
+
 //		if(cmdParams.get(0).equals("full")) {
 //			session.getElement(cmdParams.get(1))
 //			.ifPresentOrElse(Map::clear, () -> FeatJAR.log().error("no correct key specified"));
 //			return;
 //		}	
-		
+
 		cmdParams.forEach(e -> {
-			session.remove(e).ifPresentOrElse(a -> System.out.println("Removing of " + e + " Successful"),
+			session.remove(e).ifPresentOrElse(a -> FeatJAR.log().info("Removing of " + e + " Successful"),
 					() -> FeatJAR.log().error("Could not find a variable named " + e));
-		});		
+		});
 	}
-	
+
 	@Override
-    public Optional<String> getShortName() {
-        return Optional.of("delete");
-    }
-	
+	public Optional<String> getShortName() {
+		return Optional.of("delete");
+	}
+
 	@Override
-    public Optional<String> getDescription(){
-    	return Optional.of("WIP");
-    }
+	public Optional<String> getDescription() {
+		return Optional.of("WIP");
+	}
 
 }
