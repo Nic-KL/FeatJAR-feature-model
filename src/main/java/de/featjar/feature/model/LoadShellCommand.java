@@ -16,8 +16,6 @@ import de.featjar.formula.structure.IFormula;
 
 public abstract class LoadShellCommand implements IShellCommand {
 	
-	//TODO question to replace already present entries
-	
 	public static <T> Result<T> loadFormat(Path path, AFormats<T> format) {		
 		return IO.load(path, format);//.orElseLog(Verbosity.WARNING);
 	}
@@ -27,25 +25,48 @@ public abstract class LoadShellCommand implements IShellCommand {
         return Optional.of("load");
     }
     
-    public Optional<String> setName() {    	
-    	return Shell.readCommand("choose a name for your model or enter for default:");
+    public Optional<String> setName(String model, String defaultName) {    	
+    	return Shell.readCommand("choose a name for your " + model + " or enter for default (" + defaultName + ")");
+    }
+    
+    public abstract Optional<String> getModelName();
+    
+    public abstract Optional<String> getDefaultName();
+    
+    public void handleDuplicate(String name, ShellSession session) {
+    	FeatJAR.log().info("This session already contains a Variable with that name: \n");
+    	session.printVariable(name);
+    	
     }
     
     public <T> void saveModel(Result<T> result, String name, ShellSession session) {
+    	
+    	if(session.containsKey(name)) {    		
+    		handleDuplicate(name, session);
+    		
+    		//TODO question to replace already present entries
+    		
+    		//TODO back to execute, or delete and proceed
+    		
+    		
+    		return;
+    	}
+    	
+    	
 		if(result.isPresent()) {			
-			if (FeatureModel.class.isAssignableFrom(result.getClass())) {       
+			if (FeatureModel.class.isAssignableFrom(result.get().getClass())) {       
 				session.put(name, (FeatureModel) result.get(), FeatureModel.class);
 				
-			} else if (IFormula.class.isAssignableFrom(result.getClass())){ 
+			} else if (IFormula.class.isAssignableFrom(result.get().getClass())){ 
 				session.put(name, (IFormula) result.get(), IFormula.class);
 				
-			} else if (BooleanAssignment.class.isAssignableFrom(result.getClass())){ 
+			} else if (BooleanAssignment.class.isAssignableFrom(result.get().getClass())){ 
 				session.put(name, ((BooleanAssignmentGroups) result.get()).getFirstGroup().getFirst(), BooleanAssignment.class);
 				
-			} else if (BooleanAssignmentList.class.isAssignableFrom(result.getClass())){
+			} else if (BooleanAssignmentList.class.isAssignableFrom(result.get().getClass())){
 				session.put(name, ((BooleanAssignmentGroups) result.get()).getFirstGroup(), BooleanAssignmentList.class);
 				
-			} else if (BooleanAssignmentGroups.class.isAssignableFrom(result.getClass())){
+			} else if (BooleanAssignmentGroups.class.isAssignableFrom(result.get().getClass())){
 				session.put(name, (BooleanAssignmentGroups) result.get(), BooleanAssignmentGroups.class);
 				
 			}

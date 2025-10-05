@@ -31,15 +31,21 @@ public class LoadConfig extends LoadShellCommand {
 //					Paths.get(Shell.readCommand("Enter a vaild path to load a FeatureModel:\n")
 //					.orElse("")), BooleanAssignmentGroupsFormats.getInstance()).getFirstGroup().getFirst());
 
-		String name = cmdParams.size() > 0 ? cmdParams.get(0) : setName().orElse("config" + (session.getSize() + 1));
-
-		String path = cmdParams.size() > 1 ? cmdParams.get(1)
-				: Shell.readCommand("Enter a path to load a Configuration:").orElse("");
-
-		if (path.isBlank()) {
-			FeatJAR.log().info("No Configuration specified");
-			return;
-		}
+//		String name = cmdParams.size() > 0 ? cmdParams.get(0) : 
+//			setName(getModelName().orElse(""), getDefaultName().orElse(""))
+//			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
+		
+		String name = cmdParams.size() > 0 ? cmdParams.get(0) : 
+			setName(getModelName().orElse(""), getDefaultName().orElse(""))
+			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
+		
+        String path = cmdParams.size() > 1 ? cmdParams.get(1) : 
+        	Shell.readCommand("Enter a path to load a " + getModelName().orElse("")).orElse("");
+        
+        if(path.isBlank()) {
+        	FeatJAR.log().info("No " + getModelName().orElse("") + " specified"); // TODO maybe add problems ?
+        	return;
+        }
 		
 		saveModel(loadFormat(
 				Paths.get(path), BooleanAssignmentGroupsFormats.getInstance()), name, session);
@@ -57,5 +63,15 @@ public class LoadConfig extends LoadShellCommand {
 	@Override
 	public Optional<String> getDescription() {
 		return Optional.of("load a configuration - <cmd> <path>");
+	}
+
+	@Override
+	public Optional<String> getModelName() {
+		return Optional.of("Configuration");
+	}
+
+	@Override
+	public Optional<String> getDefaultName() {
+		return Optional.of("config");
 	}
 }

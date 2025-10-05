@@ -2,7 +2,10 @@ package de.featjar.feature.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+
+import de.featjar.base.FeatJAR;
 
 public class ShellSession {
 	
@@ -28,9 +31,9 @@ public class ShellSession {
 		if (storedElement.type == type) {
 			return Optional.of((T) storedElement.type.cast(storedElement.element));
 		} else {
-			throw new RuntimeException("???"); // TODO Result<T> von Problem addProblem
+			throw new RuntimeException("Wrong Type"); // TODO Result<T> von Problem addProblem
 		}
-	}	
+	}		
 	
 //	public Optional<String> getType(String key) {
 //		return Optional.ofNullable(elements.get(key)).map(e -> e.type.getSimpleName());
@@ -60,6 +63,18 @@ public class ShellSession {
 		return elements.size();
 	}
 	
+	public boolean containsKey(String key) {
+		return elements.containsKey(key);
+	}
+	
+	public void printVariable(String key) {		
+		for (Entry<String, StoredElement<?>> entry : elements.entrySet()) {
+			if(entry.getKey().equals(key)) {
+				FeatJAR.log().info("Variable: " + key + "Type:" + entry.getValue().type.getSimpleName() + "\n");
+				break;
+			}
+		}
+	}
 	
 	public void printVariables() {
 		// TODO sort, group (type or name)
