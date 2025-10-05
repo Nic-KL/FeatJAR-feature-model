@@ -16,13 +16,14 @@ public class LoadSampleGroup extends LoadShellCommand {
 		//TODO global abort, catch Exception					
 		
 		String name = cmdParams.size() > 0 ? cmdParams.get(0) : 
-			setName().orElse("sampleGroup" + (session.getSize() + 1));
+			setName(getModelName().orElse(""), getDefaultName().orElse(""))
+			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
 		
         String path = cmdParams.size() > 1 ? cmdParams.get(1) : 
-        	Shell.readCommand("Enter a path to load a SampleGroup:").orElse("");
+        	Shell.readCommand("Enter a path to load a " + getModelName().orElse("")).orElse("");
         
         if(path.isBlank()) {
-        	FeatJAR.log().info("No SampleGroup specified");
+        	FeatJAR.log().info("No " + getModelName().orElse("") + " specified"); // TODO maybe add problems ?
         	return;
         }
         
@@ -37,6 +38,14 @@ public class LoadSampleGroup extends LoadShellCommand {
     public Optional<String> getDescription(){
     	return Optional.of("load a sample group - <cmd> <name> <path>");
     }
+	@Override
+	public Optional<String> getModelName() {
+		return Optional.of("sampleGroup");
+	}
+	@Override
+	public Optional<String> getDefaultName() {
+		return Optional.of("sg");
+	}
 }	
 	
 

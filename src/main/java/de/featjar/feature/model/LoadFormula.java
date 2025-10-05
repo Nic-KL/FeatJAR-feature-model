@@ -10,17 +10,18 @@ import de.featjar.formula.io.FormulaFormats;
 public class LoadFormula extends LoadShellCommand {
 	
 	@Override
-	public void execute(ShellSession session, List<String> cmdParams) {
-		//TODO global abort, catch Exception						
+	public void execute(ShellSession session, List<String> cmdParams) {		
+		//TODO global abort, catch Exception					
 		
 		String name = cmdParams.size() > 0 ? cmdParams.get(0) : 
-			setName().orElse("formula" + (session.getSize() + 1));
+			setName(getModelName().orElse(""), getDefaultName().orElse(""))
+			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
 		
         String path = cmdParams.size() > 1 ? cmdParams.get(1) : 
-        	Shell.readCommand("Enter a path to load a Formula:").orElse("");
+        	Shell.readCommand("Enter a path to load a " + getModelName().orElse("")).orElse("");
         
         if(path.isBlank()) {
-        	FeatJAR.log().info("No Formula specified");
+        	FeatJAR.log().info("No " + getModelName().orElse("") + " specified"); // TODO maybe add problems ?
         	return;
         }
         
@@ -55,4 +56,12 @@ public class LoadFormula extends LoadShellCommand {
     public Optional<String> getDescription(){
     	return Optional.of("load a formula - <cmd> <name> <path>");
     }
+	@Override
+	public Optional<String> getModelName() {
+		return Optional.of("Formula");
+	}
+	@Override
+	public Optional<String> getDefaultName() {
+		return Optional.of("form");
+	}
 }
