@@ -1,13 +1,19 @@
 package de.featjar.feature.model;
 
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.AFormats;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.base.log.Log.Verbosity;
+import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -16,42 +22,46 @@ import de.featjar.formula.structure.IFormula;
 
 public abstract class LoadShellCommand implements IShellCommand {
 	
-	public static <T> Result<T> loadFormat(Path path, AFormats<T> format) {		
-		return IO.load(path, format);//.orElseLog(Verbosity.WARNING);
-	}
-	
     @Override
     public Optional<String> getShortName() {
         return Optional.of("load");
     }
     
-    public Optional<String> setName(String model, String defaultName) {    	
-    	return Shell.readCommand("choose a name for your " + model + " or enter for default (" + defaultName + ")");
-    }
-    
-    public abstract Optional<String> getModelName();
+    public abstract Optional<String> getFormatName();
     
     public abstract Optional<String> getDefaultName();
     
-    public void handleDuplicate(String name, ShellSession session) {
-    	FeatJAR.log().info("This session already contains a Variable with that name: \n");
-    	session.printVariable(name);
-    	
+    public String setPath(List<String> cmdParams) {
+    	return cmdParams.size() > 1 ? cmdParams.get(1) : 
+        	Shell.readCommand("Enter a path to load a " + getFormatName().orElse("")).orElse("");
     }
     
-    public <T> void saveModel(Result<T> result, String name, ShellSession session) {
+    public String setVarName(ShellSession session, List<String> cmdParams) {
+    	return cmdParams.size() > 0 ? cmdParams.get(0) : 
+    		Shell.readCommand("choose a name for your " + getFormatName().orElse("") + " or enter for default (" + getDefaultName().orElse("") + ")")
+			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
+    }
+    
+    public void handleDuplicate(String name, ShellSession session) {
+    	FeatJAR.log().info("This session already contains a Variable with that name: \n");
+    	session.printVariable(name);    	
+    }
+    
+    public <T> void loadFormat(Result<T> result, String name, ShellSession session) {
     	
-    	if(session.containsKey(name)) {    		
+    	while(session.containsKey(name)) {    		
     		handleDuplicate(name, session);
-    		
-    		//TODO question to replace already present entries
-    		
-    		//TODO back to execute, or delete and proceed
-    		
-    		
-    		return;
-    	}
-    	
+    		String choice = Shell.readCommand("Overwrite " + name + " ? (y)es, (r)ename, (a)bort").orElse("").toLowerCase();
+    		if(choice.equals("y")) {
+    			new DeleteShellCommand().removeSingleEntry(session, name); 
+    			break;
+    		} else if(choice.equals("r")) {
+    			name = Shell.readCommand("Enter another vaiable name: ").orElse("");
+    		} else if(choice.equals("a")){
+    			FeatJAR.log().info("Aborted\n");
+    			return;     		
+    		}
+    	}    	
     	
 		if(result.isPresent()) {			
 			if (FeatureModel.class.isAssignableFrom(result.get().getClass())) {       
@@ -71,8 +81,23 @@ public abstract class LoadShellCommand implements IShellCommand {
 				
 			}
 			FeatJAR.log().info(name + " successfully loaded\n");		
-		} else {
-			FeatJAR.log().problems(result.getProblems(), Verbosity.ERROR);
+		} else {			
+			FeatJAR.log().error("Could not load file %s for variable %s", result.getProblems().get(0).getMessage(), name);
+			FeatJAR.log().problems(result.getProblems(), Verbosity.DEBUG);
 		}
     }
+    
+	public <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) {
+		
+		String name = setVarName(session, cmdParams);        
+		String path = setPath(cmdParams);
+        
+        if(path.isBlank()) {
+        	FeatJAR.log().info("No " + getFormatName().orElse("") + " specified"); // TODO maybe add problems ?
+        	return;
+        }
+        
+        loadFormat(IO.load(
+				Paths.get(path), format), name, session);
+	}
 }

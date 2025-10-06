@@ -70,7 +70,7 @@ public class ShellSession {
 	public void printVariable(String key) {		
 		for (Entry<String, StoredElement<?>> entry : elements.entrySet()) {
 			if(entry.getKey().equals(key)) {
-				FeatJAR.log().info("Variable: " + key + "Type:" + entry.getValue().type.getSimpleName() + "\n");
+				FeatJAR.log().info("Variable: " + key + " Type: " + entry.getValue().type.getSimpleName() + "\n");
 				break;
 			}
 		}

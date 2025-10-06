@@ -21,7 +21,7 @@ import de.featjar.formula.io.textual.StringFormulaFormat;
 import de.featjar.formula.structure.IFormula;
 
 // TODO nicht alle Vriablen sondern nur X gleiches für load, Format dass alles als String speichert, autocomplete und dann erst weiter \r dann geht er einen zurück in der konsole, globales abort
-// TODO store fragt nur nach dateinamen sonst cwd
+
 public class StoreShellCommand implements IShellCommand {	
 	
 	public StoreShellCommand() {
@@ -36,7 +36,6 @@ public class StoreShellCommand implements IShellCommand {
 		    .map(c -> Arrays.stream(c.split("\\s+")).collect(Collectors.toList()))
 		    .orElse(Collections.emptyList());
 		}
-		
 		
         cmdParams.forEach(e -> {
             session.getElement(e).ifPresent(element -> {

@@ -1,10 +1,14 @@
 package de.featjar.feature.model;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.io.IO;
 import de.featjar.feature.model.io.FeatureModelFormats;
 
 
@@ -14,20 +18,31 @@ public class LoadFeatureModel extends LoadShellCommand {
 	public void execute(ShellSession session, List<String> cmdParams) {			
 		//TODO global abort, catch Exception					
 		
-		String name = cmdParams.size() > 0 ? cmdParams.get(0) : 
-			setName(getModelName().orElse(""), getDefaultName().orElse(""))
-			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
+//		String name = null;
+//		String path = null;
+//		
+//		if(cmdParams.isEmpty()) {
+//	        name = setVarName(getDefaultName().orElse(""), getFormatName().orElse(""), session, cmdParams);        
+//	        path = setPath(getFormatName().orElse("Empty Model ?"), cmdParams);
+//		} else if(cmdParams.size() == 1) {
+//			name = setVarName(getDefaultName().orElse(""), getFormatName().orElse(""), session, cmdParams);     
+//			path = cmdParams.get(0);
+//		} else {
+//			name = cmdParams.get(0);
+//			path = cmdParams.get(1);
+//		}
+//        
+//        if(path.isBlank()) {
+//        	FeatJAR.log().info("No " + getFormatName().orElse("") + " specified"); // TODO maybe add problems ?
+//        	return;
+//        }
+//        
+//        loadFormat(IO.load(
+//				Paths.get(path), FeatureModelFormats.getInstance()), name, session);
 		
-        String path = cmdParams.size() > 1 ? cmdParams.get(1) : 
-        	Shell.readCommand("Enter a path to load a " + getModelName().orElse("")).orElse("");
-        
-        if(path.isBlank()) {
-        	FeatJAR.log().info("No " + getModelName().orElse("") + " specified"); // TODO maybe add problems ?
-        	return;
-        }
-        
-		saveModel(loadFormat(
-				Paths.get(path), FeatureModelFormats.getInstance()), name, session);
+//		IO.load(Paths.get(""), FeatureModelFormats.getInstance());
+		
+		parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
 	}		
     @Override
     public Optional<String> getShortName() {
@@ -38,7 +53,7 @@ public class LoadFeatureModel extends LoadShellCommand {
     	return Optional.of("load a feature model - <cmd> <name> <path>");
     }
 	@Override
-	public Optional<String> getModelName() {
+	public Optional<String> getFormatName() {
 		return Optional.of("FeatureModel");
 	}
 	@Override
