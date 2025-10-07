@@ -7,7 +7,6 @@ public class ExitShellCommand implements IShellCommand {
 	
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {		
-		Shell.printArt();
 		System.exit(0);
 	}	
 	

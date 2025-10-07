@@ -22,7 +22,7 @@ public class Shell {
 	private static final Scanner shellScanner = new Scanner(System.in);
 
 	private Shell() {
-		FeatJAR.initialize(FeatJAR.shellConfiguration());
+		FeatJAR.initialize(FeatJAR.shellConfiguration());				
 		printArt();		
 		new HelpShellCommand().printCommands();
 		run();
@@ -52,6 +52,11 @@ public class Shell {
 	}
 
 	private Result<IShellCommand> parseCommand(String commandString) {	
+		
+		if(commandString.isEmpty()) {
+			return Result.empty();
+		}
+		
 		ShellCommands shellCommandsExentionsPoint = FeatJAR.extensionPoint(ShellCommands.class);
 		List<IShellCommand> commands = shellCommandsExentionsPoint
 				.getExtensions().stream().filter(command -> command.getShortName()
@@ -93,16 +98,14 @@ public class Shell {
 			}
 			command = matchingExtension.get();
 		} else {
-			if(commands.get(0).getShortName().get().matches(commandString)) {
-				command = commands.get(0);
-				return Result.of(command);
-			}
 			String choice = readCommand("Do you mean: " + commands.get(0).getShortName().get() + "? (ENTER) or (a)bort").orElse("");
+			FeatJAR.log().info(choice);
 			if(choice.isEmpty()) {
 				command = commands.get(0);
 			} else {
-				return Result.empty();
+				parseCommand(choice);
 			}
+			
 		}
 		return Result.of(command);
 	}

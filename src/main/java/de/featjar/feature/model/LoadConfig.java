@@ -1,15 +1,9 @@
 package de.featjar.feature.model;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.io.IO;
-import de.featjar.feature.model.io.FeatureModelFormats;
-import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
-import de.featjar.formula.io.FormulaFormats;
 
 public class LoadConfig extends LoadShellCommand {
 	@Override

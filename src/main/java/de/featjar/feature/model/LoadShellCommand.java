@@ -1,19 +1,15 @@
 package de.featjar.feature.model;
 
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.AFormats;
-import de.featjar.base.io.format.IFormat;
 import de.featjar.base.log.Log.Verbosity;
-import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -33,7 +29,7 @@ public abstract class LoadShellCommand implements IShellCommand {
     
     public String setPath(List<String> cmdParams) {
     	return cmdParams.size() > 1 ? cmdParams.get(1) : 
-        	Shell.readCommand("Enter a path to load a " + getFormatName().orElse("")).orElse("");
+        	Shell.readCommand("Enter a path to load a " + getFormatName().orElse("") + "or (ESC) for abort").orElse("");
     }
     
     public String setVarName(ShellSession session, List<String> cmdParams) {
@@ -42,58 +38,66 @@ public abstract class LoadShellCommand implements IShellCommand {
 			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
     }
     
-    public void handleDuplicate(String name, ShellSession session) {
-    	FeatJAR.log().info("This session already contains a Variable with that name: \n");
-    	session.printVariable(name);    	
-    }
+	public void removeSingleEntry(ShellSession session, String name) {
+		session.remove(name).ifPresentOrElse(e ->  FeatJAR.log().info("Removing of " + e + " successful"),
+				() -> FeatJAR.log().error("Could not find a variable named " + name));
+	}
     
-    public <T> void loadFormat(Result<T> result, String name, ShellSession session) {
+    public <T> void loadFormat(Result<T> result, String key, ShellSession session) {
     	
-    	while(session.containsKey(name)) {    		
-    		handleDuplicate(name, session);
-    		String choice = Shell.readCommand("Overwrite " + name + " ? (y)es, (r)ename, (a)bort").orElse("").toLowerCase();
-    		if(choice.equals("y")) {
-    			new DeleteShellCommand().removeSingleEntry(session, name); 
+    	while(session.containsKey(key)) {    		
+        	FeatJAR.log().info("This session already contains a Variable with that name: \n");
+        	session.printVariable(key);    
+    		String choice = Shell.readCommand("Overwrite " + key + " ? (y)es, (r)ename, (a)bort").orElse("").toLowerCase();
+    		if(Objects.equals("y", choice)) {
+    			removeSingleEntry(session, choice);
     			break;
-    		} else if(choice.equals("r")) {
-    			name = Shell.readCommand("Enter another vaiable name: ").orElse("");
-    		} else if(choice.equals("a")){
+    		} else if(Objects.equals("r", choice)) {
+    			key = Shell.readCommand("Enter another vaiable name: ").orElse("");
+    		} else if(Objects.equals("a", choice)){
     			FeatJAR.log().info("Aborted\n");
     			return;     		
     		}
-    	}    	
+    	} 
     	
 		if(result.isPresent()) {			
 			if (FeatureModel.class.isAssignableFrom(result.get().getClass())) {       
-				session.put(name, (FeatureModel) result.get(), FeatureModel.class);
+				session.put(key, (FeatureModel) result.get(), FeatureModel.class);
 				
 			} else if (IFormula.class.isAssignableFrom(result.get().getClass())){ 
-				session.put(name, (IFormula) result.get(), IFormula.class);
+				session.put(key, (IFormula) result.get(), IFormula.class);
 				
 			} else if (BooleanAssignment.class.isAssignableFrom(result.get().getClass())){ 
-				session.put(name, ((BooleanAssignmentGroups) result.get()).getFirstGroup().getFirst(), BooleanAssignment.class);
+				session.put(key, ((BooleanAssignmentGroups) result.get()).getFirstGroup().getFirst(), BooleanAssignment.class);
 				
 			} else if (BooleanAssignmentList.class.isAssignableFrom(result.get().getClass())){
-				session.put(name, ((BooleanAssignmentGroups) result.get()).getFirstGroup(), BooleanAssignmentList.class);
+				session.put(key, ((BooleanAssignmentGroups) result.get()).getFirstGroup(), BooleanAssignmentList.class);
 				
 			} else if (BooleanAssignmentGroups.class.isAssignableFrom(result.get().getClass())){
-				session.put(name, (BooleanAssignmentGroups) result.get(), BooleanAssignmentGroups.class);
+				session.put(key, (BooleanAssignmentGroups) result.get(), BooleanAssignmentGroups.class);
 				
 			}
-			FeatJAR.log().info(name + " successfully loaded\n");		
+			FeatJAR.log().info(key + " successfully loaded\n");		
 		} else {			
-			FeatJAR.log().error("Could not load file %s for variable %s", result.getProblems().get(0).getMessage(), name);
+			FeatJAR.log().error("Could not load file %s for variable %s", result.getProblems().get(0).getMessage(), key);
 			FeatJAR.log().problems(result.getProblems(), Verbosity.DEBUG);
 		}
     }
     
-	public <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) {
-		
+	public <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) throws Exception {		
 		String name = setVarName(session, cmdParams);        
+		if(Objects.equals(name, "\"\\u001B\"")) {
+			FeatJAR.log().info("aborted");
+			throw new Exception("abort");
+		}
 		String path = setPath(cmdParams);
+		if(Objects.equals(path, "\"\\u001B\"") || Objects.equals(path, "17")) {
+			FeatJAR.log().info("aborted");
+			throw new Exception("abort");
+		}
         
         if(path.isBlank()) {
-        	FeatJAR.log().info("No " + getFormatName().orElse("") + " specified"); // TODO maybe add problems ?
+        	FeatJAR.log().info("No correct path for %s specified", getFormatName().orElse("")); // TODO maybe add problems ?
         	return;
         }
         

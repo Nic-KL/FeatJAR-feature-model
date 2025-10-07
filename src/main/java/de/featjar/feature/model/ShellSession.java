@@ -82,7 +82,22 @@ public class ShellSession {
 		
 		elements.entrySet().forEach(m -> System.out.println(m.getKey() + "   (" 
 		+ m.getValue().type.getSimpleName() + ")" ));
-		// TODO use always entrySet
-//		elements.keySet().stream().map(s -> getType(s).orElse("?")).sorted().forEach(s -> System.out.println(s));
+	}
+	
+	public void printSortedVariables() {
+		// TODO sort, group (type or name)
+//		elements.keySet().forEach(ks -> System.out.println(ks + " (" + getType(ks).orElse("?") + ")"));
+		
+//		elements.entrySet().stream().sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(
+//                Map.Entry::getKey,
+//                Map.Entry::getValue,
+//                (oldV, newV) -> oldV,
+//                LinkedHashMap::new
+//        )).forEach(m -> System.out.println(m.getKey().toString() + "   (" 
+//		+ m.getValue().type.getSimpleName() + ")" );
+
+		
+		elements.entrySet().forEach(m -> System.out.println(m.getKey().toString() + "   (" 
+		+ m.getValue().type.getSimpleName() + ")" ));
 	}
 }

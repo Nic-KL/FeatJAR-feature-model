@@ -7,6 +7,14 @@ public class Variables implements IShellCommand{
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
+		
+//		if(cmdParams.size() == 1) {
+//			cmdParams.get(0).e
+//		}
+		
+		
+		
+		
 		session.printVariables();
 		
 	}
@@ -18,7 +26,7 @@ public class Variables implements IShellCommand{
     
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("WIP");
+    	return Optional.of("print the name and type of all session variables");
     }
 
 }

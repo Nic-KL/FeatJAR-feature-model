@@ -16,6 +16,7 @@ public class PrintShellCommand implements IShellCommand {
 		//  TODO layer for electing the type and then	
 		
 		if(cmdParams.isEmpty()) {
+			session.printVariables();
 			cmdParams = Shell.readCommand("Enter the variable names you want to print:")
 				    .map(c -> Arrays.stream(c.toLowerCase().split("\\s+")).collect(Collectors.toList()))
 				    .orElse(Collections.emptyList());
@@ -24,7 +25,7 @@ public class PrintShellCommand implements IShellCommand {
 		cmdParams.forEach(e -> {
 		    session.getElement(e)
 		        .ifPresentOrElse(m -> {
-		        	FeatJAR.log().info(e + ": \n\n");
+		        	FeatJAR.log().info(e + ":");
 		        	printMap(m);
 		        }, () -> FeatJAR.log().error("Could not find a variable named " + e));
 		});	
@@ -44,6 +45,6 @@ public class PrintShellCommand implements IShellCommand {
     }
 
     public Optional<String> getDescription(){
-    	return Optional.of("WIP");
+    	return Optional.of("print the content of variables - <cmd> <name> ...");
     }
 }
