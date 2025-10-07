@@ -1,15 +1,9 @@
 package de.featjar.feature.model;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.io.IO;
-import de.featjar.feature.model.io.FeatureModelFormats;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
-import de.featjar.formula.io.FormulaFormats;
 
 public class LoadSample extends LoadShellCommand {
 
@@ -21,7 +15,7 @@ public class LoadSample extends LoadShellCommand {
 	}
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("load-Sample");
+        return Optional.of("loadSample");
     }
     @Override
     public Optional<String> getDescription(){

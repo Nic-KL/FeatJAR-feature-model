@@ -1,12 +1,8 @@
 package de.featjar.feature.model;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
-import de.featjar.base.FeatJAR;
-import de.featjar.base.io.IO;
-import de.featjar.feature.model.io.FeatureModelFormats;
 import de.featjar.formula.io.FormulaFormats;
 
 public class LoadFormula extends LoadShellCommand {
@@ -19,7 +15,7 @@ public class LoadFormula extends LoadShellCommand {
 	}	
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("load-Formula");
+        return Optional.of("loadFormula");
     }
     @Override
     public Optional<String> getDescription(){

@@ -14,26 +14,16 @@ public class DeleteShellCommand implements IShellCommand {
 	public void execute(ShellSession session, List<String> cmdParams) {
 
 		if (cmdParams.isEmpty()) {
+			session.printVariables();
 			cmdParams = Shell.readCommand("Enter the variable names you want to delete:")
 					.map(c -> Arrays.stream(c.split("\\s+")).collect(Collectors.toList()))
 					.orElse(Collections.emptyList());
 		}
 
-//		if(cmdParams.get(0).equals("full")) {
-//			session.getElement(cmdParams.get(1))
-//			.ifPresentOrElse(Map::clear, () -> FeatJAR.log().error("no correct key specified"));
-//			return;
-//		}	
-
 		cmdParams.forEach(e -> {
 			session.remove(e).ifPresentOrElse(a -> FeatJAR.log().info("Removing of " + e + " successful"),
 					() -> FeatJAR.log().error("Could not find a variable named " + e));
 		});
-	}
-	
-	public void removeSingleEntry(ShellSession session, String name) {
-		session.remove(name).ifPresentOrElse(e ->  FeatJAR.log().info("Removing of " + e + " successful"),
-				() -> FeatJAR.log().error("Could not find a variable named " + name));
 	}
 
 	@Override
@@ -43,7 +33,7 @@ public class DeleteShellCommand implements IShellCommand {
 
 	@Override
 	public Optional<String> getDescription() {
-		return Optional.of("WIP");
+		return Optional.of("delete session variables - <cmd> <name> ...");
 	}
 
 }
