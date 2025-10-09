@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.io.IO;
+import de.featjar.base.shell.IShellCommand;
+import de.featjar.base.shell.Shell;
+import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;

@@ -3,6 +3,7 @@ package de.featjar.feature.model;
 import java.util.List;
 import java.util.Optional;
 
+import de.featjar.base.shell.ShellSession;
 import de.featjar.feature.model.io.FeatureModelFormats;
 
 
@@ -36,7 +37,14 @@ public class LoadFeatureModel extends LoadShellCommand {
 		
 //		IO.load(Paths.get(""), FeatureModelFormats.getInstance());
 		
+//		try {
+//			parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
+//		} catch (Exception e) {
+//			FeatJAR.log().info(e.getMessage());
+//		}
+		
 		parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
+		
 	}		
     @Override
     public Optional<String> getShortName() {
