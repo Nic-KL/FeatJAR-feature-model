@@ -3,6 +3,7 @@ package de.featjar.feature.model;
 import java.util.List;
 import java.util.Optional;
 
+import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.io.FormulaFormats;
 
 public class LoadFormula extends LoadShellCommand {
