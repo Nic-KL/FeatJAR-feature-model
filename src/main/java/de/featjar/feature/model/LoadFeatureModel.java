@@ -11,40 +11,9 @@ public class LoadFeatureModel extends LoadShellCommand {
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {			
-		//TODO global abort, catch Exception					
+		//TODO global abort, catch Exception		
 		
-//		String name = null;
-//		String path = null;
-//		
-//		if(cmdParams.isEmpty()) {
-//	        name = setVarName(getDefaultName().orElse(""), getFormatName().orElse(""), session, cmdParams);        
-//	        path = setPath(getFormatName().orElse("Empty Model ?"), cmdParams);
-//		} else if(cmdParams.size() == 1) {
-//			name = setVarName(getDefaultName().orElse(""), getFormatName().orElse(""), session, cmdParams);     
-//			path = cmdParams.get(0);
-//		} else {
-//			name = cmdParams.get(0);
-//			path = cmdParams.get(1);
-//		}
-//        
-//        if(path.isBlank()) {
-//        	FeatJAR.log().info("No " + getFormatName().orElse("") + " specified"); // TODO maybe add problems ?
-//        	return;
-//        }
-//        
-//        loadFormat(IO.load(
-//				Paths.get(path), FeatureModelFormats.getInstance()), name, session);
-		
-//		IO.load(Paths.get(""), FeatureModelFormats.getInstance());
-		
-//		try {
-//			parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
-//		} catch (Exception e) {
-//			FeatJAR.log().info(e.getMessage());
-//		}
-		
-		parseArguments(session, cmdParams, FeatureModelFormats.getInstance());
-		
+		parseArguments(session, cmdParams, FeatureModelFormats.getInstance());		
 	}		
     @Override
     public Optional<String> getShortName() {
