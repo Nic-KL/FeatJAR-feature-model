@@ -5,19 +5,13 @@
         <extension id="de.featjar.feature.model.io.xml.XMLFeatureModelFormat" />
         <extension id="de.featjar.feature.model.io.dimacs.DimacsFeatureModelFormat" />
     </point>
-    <point id="de.featjar.feature.model.ShellCommands">
+    <point id="de.featjar.base.shell.ShellCommands">
     	<extension id="de.featjar.feature.model.LoadFeatureModel" />
     	<extension id="de.featjar.feature.model.LoadFormula" />
     	<extension id="de.featjar.feature.model.LoadConfig" />
     	<extension id="de.featjar.feature.model.LoadSample" />
     	<extension id="de.featjar.feature.model.LoadSampleGroup" />
-    	<extension id="de.featjar.feature.model.HelpShellCommand" />
-    	<extension id="de.featjar.feature.model.ExitShellCommand" />
 		<extension id="de.featjar.feature.model.StoreShellCommand" />
-		<extension id="de.featjar.feature.model.PrintShellCommand" />
-		<extension id="de.featjar.feature.model.PrintShellCommand" />
-		<extension id="de.featjar.feature.model.ClearShellCommand" />
-		<extension id="de.featjar.feature.model.DeleteShellCommand" />
-		<extension id="de.featjar.feature.model.Variables" />
+		<extension id="de.featjar.feature.model.LoadPathVarShellCommand" />
     </point>       
 </extensions>
