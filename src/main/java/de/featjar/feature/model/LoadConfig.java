@@ -6,7 +6,7 @@ import java.util.Optional;
 import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
-public class LoadConfig extends LoadShellCommand {
+public class LoadConfig extends ALoadShellCommand {
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
 		// TODO global abort

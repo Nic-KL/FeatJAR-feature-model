@@ -7,7 +7,7 @@ import de.featjar.base.shell.ShellSession;
 import de.featjar.feature.model.io.FeatureModelFormats;
 
 
-public class LoadFeatureModel extends LoadShellCommand {
+public class LoadFeatureModel extends ALoadShellCommand {
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {			

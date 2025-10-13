@@ -6,7 +6,7 @@ import java.util.Optional;
 import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.io.FormulaFormats;
 
-public class LoadFormula extends LoadShellCommand {
+public class LoadFormula extends ALoadShellCommand {
 	
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {		

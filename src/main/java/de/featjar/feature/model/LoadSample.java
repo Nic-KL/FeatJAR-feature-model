@@ -6,7 +6,7 @@ import java.util.Optional;
 import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
-public class LoadSample extends LoadShellCommand {
+public class LoadSample extends ALoadShellCommand {
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {

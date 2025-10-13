@@ -10,6 +10,7 @@ import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.AFormats;
+import de.featjar.base.log.Log.Verbosity;
 import de.featjar.base.shell.IShellCommand;
 import de.featjar.base.shell.Shell;
 import de.featjar.base.shell.ShellSession;
@@ -19,13 +20,8 @@ import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.structure.IFormula;
 
 
-public abstract class LoadShellCommand implements IShellCommand {
-	
-    @Override
-    public Optional<String> getShortName() {
-        return Optional.of("load");
-    }
-    
+public abstract class ALoadShellCommand implements IShellCommand {
+	    
     public abstract Optional<String> getFormatName();
     
     public abstract Optional<String> getDefaultName();
@@ -46,14 +42,13 @@ public abstract class LoadShellCommand implements IShellCommand {
     }
     
 	public void removeSingleEntry(ShellSession session, String name) {
-		session.remove(name).ifPresentOrElse(e ->  FeatJAR.log().info("Removing of " + e + " successful"),
+		session.remove(name).ifPresentOrElse(e ->  FeatJAR.log().message("Removing of " + e + " successful"),
 				() -> FeatJAR.log().error("Could not find a variable named " + name));
 	}
-    
-    public <T> void loadFormat(Result<T> result, String key, ShellSession session) {
-    	
+	
+	public Optional<String> resolveKeyDoubling(String key, ShellSession session) {
     	while(session.containsKey(key)) {    		
-        	FeatJAR.log().info("This session already contains a Variable with that name: \n");
+        	FeatJAR.log().message("This session already contains a Variable with that name: \n");
         	session.printVariable(key);    
     		String choice = Shell.readCommand("Overwrite " + key + " ? (y)es, (r)ename, (a)bort").orElse("").toLowerCase();
     		if(Objects.equals("y", choice)) {
@@ -62,10 +57,20 @@ public abstract class LoadShellCommand implements IShellCommand {
     		} else if(Objects.equals("r", choice)) {
     			key = Shell.readCommand("Enter another vaiable name: ").orElse("");
     		} else if(Objects.equals("a", choice)){
-    			FeatJAR.log().info("Aborted\n");
-    			return;     		
+    			FeatJAR.log().message("Aborted\n");
+    			return Optional.empty();     		
     		}
     	} 
+    	return Optional.of(key);
+	}
+    
+    private <T> void loadFormat(Result<T> result, String key, ShellSession session) {
+    	
+    	key = resolveKeyDoubling(key, session).get();
+    	
+    	if(key.isEmpty()) {
+    		return;
+    	}
     	
 		if(result.isPresent()) {			
 			if (FeatureModel.class.isAssignableFrom(result.get().getClass())) {       
@@ -84,25 +89,29 @@ public abstract class LoadShellCommand implements IShellCommand {
 				session.put(key, (BooleanAssignmentGroups) result.get(), BooleanAssignmentGroups.class);
 				
 			}
-			FeatJAR.log().info(key + " successfully loaded\n");		
+			FeatJAR.log().message(key + " successfully loaded\n");		
 		} else {						
-			printformatedProblem(result);			
+			printformatedProblem(result, key);			
 		}
     }
     
-    private <T> void printformatedProblem(Result<T> res) {
-		String splitter = "Possible formats:";
-        String input = Problem.printProblems(res.getProblems());
-        int firstIndex = input.indexOf(splitter) + splitter.length();
-        int SecondIndex = input.lastIndexOf("]") + 1;        
-        String message = input.substring(0, firstIndex);
-        String possibleFormats = input.substring(firstIndex , SecondIndex);
-        possibleFormats = possibleFormats.replace(",", ",\n");
-        String stackTrace = input.substring(SecondIndex);        
+    private <T> void printformatedProblem(Result<T> result, String key) {
+		String wrongFormat = "Possible formats:";
+        String input = Problem.printProblems(result.getProblems());
         
-        FeatJAR.log().error(message + "\n");
-        FeatJAR.log().error(possibleFormats);
-        FeatJAR.log().error("\nStacktrace:" + stackTrace);
+        if(input.contains(wrongFormat)) {
+            int firstIndex = input.indexOf(wrongFormat) + wrongFormat.length();
+            int SecondIndex = input.lastIndexOf("]") + 1;        
+            String message = input.substring(0, firstIndex);
+            String possibleFormats = input.substring(firstIndex , SecondIndex);
+            possibleFormats = possibleFormats.replace(",", ",\n"); 
+            
+            FeatJAR.log().error(message + "\n");
+            FeatJAR.log().error(possibleFormats);
+        } else {
+			FeatJAR.log().error("Could not load file %s for variable %s", result.getProblems().get(0).getMessage(), key);
+			FeatJAR.log().problems(result.getProblems(), Verbosity.DEBUG);
+        }        
     }
     
 	public <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) {		
