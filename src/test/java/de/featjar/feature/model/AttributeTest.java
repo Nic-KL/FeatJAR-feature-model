@@ -59,8 +59,7 @@ public class AttributeTest {
     @Test
     public void attributableGetSet() {
         LinkedHashMap<IAttribute<?>, Object> attributeToValueMap = new LinkedHashMap<>();
-        Attribute<String> attributeWithDefaultValue =
-                new Attribute<>(Attribute.DEFAULT_NAMESPACE, "test", String.class).setDefaultValue("default");
+        Attribute<String> attributeWithDefaultValue = new Attribute<>("test", String.class).setDefaultValue("default");
         Assertions.assertTrue(featureModel.getAttributeValue(attribute).isEmpty());
         Assertions.assertEquals(Result.of("default"), featureModel.getAttributeValue(attributeWithDefaultValue));
         assertEquals(attributeToValueMap, featureModel.getAttributes().get());
@@ -84,8 +83,7 @@ public class AttributeTest {
 
     @Test
     public void attributableToggle() {
-        Attribute<Boolean> booleanAttribute =
-                new Attribute<>(Attribute.DEFAULT_NAMESPACE, "test", Boolean.class).setDefaultValue(false);
+        Attribute<Boolean> booleanAttribute = new Attribute<>("test", Boolean.class).setDefaultValue(false);
         Assertions.assertEquals(Result.of(false), featureModel.getAttributeValue(booleanAttribute));
         featureModel.mutate().toggleAttributeValue(booleanAttribute);
         Assertions.assertEquals(Result.of(true), featureModel.getAttributeValue(booleanAttribute));

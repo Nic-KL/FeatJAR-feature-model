@@ -22,14 +22,14 @@ package de.featjar.feature.model.io;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.io.format.AFormats;
-import de.featjar.feature.model.FeatureModel;
+import de.featjar.feature.model.IFeatureModel;
 
 /**
- * Manages all formats for {@link FeatureModel feature models}.
+ * Manages all formats for {@link IFeatureModel feature models}.
  *
  * @author Sebastian Krieter
  */
-public class FeatureModelFormats extends AFormats<FeatureModel> {
+public class FeatureModelFormats extends AFormats<IFeatureModel> {
 
     public static FeatureModelFormats getInstance() {
         return FeatJAR.extensionPoint(FeatureModelFormats.class);

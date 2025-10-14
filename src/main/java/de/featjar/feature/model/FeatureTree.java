@@ -38,27 +38,31 @@ import de.featjar.feature.model.IFeatureTree.IMutableFeatureTree;
 
 public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFeatureTree {
 
-    public static final class Group {
-        private Range groupRange;
+    public final class Group {
+        private Range groupCardinality;
 
         private Group(int lowerBound, int upperBound) {
-            this.groupRange = Range.of(lowerBound, upperBound);
+            this.groupCardinality = Range.of(lowerBound, upperBound);
         }
 
-        private Group(Range groupRange) {
-            this.groupRange = Range.copy(groupRange);
+        public Group(Range groupRange) {
+            this.groupCardinality = Range.copy(groupRange);
         }
 
         private Group(Group otherGroup) {
-            this.groupRange = Range.copy(otherGroup.groupRange);
+            this.groupCardinality = Range.copy(otherGroup.groupCardinality);
+        }
+
+        private void setBounds(int lowerBound, int upperBound) {
+            groupCardinality.setBounds(lowerBound, upperBound);
         }
 
         public int getLowerBound() {
-            return groupRange.getLowerBound();
+            return groupCardinality.getLowerBound();
         }
 
         public int getUpperBound() {
-            return groupRange.getUpperBound();
+            return groupCardinality.getUpperBound();
         }
 
         public boolean isCardinalityGroup() {
@@ -66,19 +70,28 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
         }
 
         public boolean isAlternative() {
-            return groupRange.is(1, 1);
+            return groupCardinality.is(1, 1);
         }
 
         public boolean isOr() {
-            return groupRange.is(1, Range.OPEN);
+            return groupCardinality.is(1, Range.OPEN);
         }
 
         public boolean isAnd() {
-            return groupRange.is(0, Range.OPEN);
+            return groupCardinality.is(0, Range.OPEN);
         }
 
         public boolean allowsZero() {
-            return groupRange.getLowerBound() == 0 || groupRange.getLowerBound() == Range.OPEN;
+            return groupCardinality.getLowerBound() <= 0;
+        }
+
+        public List<IFeatureTree> getGroupSiblings() {
+            IFeatureTree parent = getParent().orElse(null);
+            return (parent == null)
+                    ? List.of()
+                    : parent.getChildren().stream()
+                            .filter(t -> t.getParentGroupID() == parentGroupID)
+                            .collect(Collectors.toList());
         }
 
         @Override
@@ -98,32 +111,31 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
 
         @Override
         public String toString() {
-            return groupRange.toString();
+            return groupCardinality.toString();
         }
     }
 
-    protected IFeature feature;
+    protected final IFeature feature;
 
-    protected int groupID;
+    protected int parentGroupID;
 
-    protected Range featureRange;
-    protected List<Group> groups;
+    protected Range cardinality;
+    protected ArrayList<Group> childrenGroups;
 
     protected LinkedHashMap<IAttribute<?>, Object> attributeValues;
 
     protected FeatureTree(IFeature feature) {
         this.feature = Objects.requireNonNull(feature);
-        featureRange = Range.of(0, 1);
-        groups = new ArrayList<>(1);
-        groups.add(new Group(Range.atLeast(0)));
+        cardinality = Range.of(0, 1);
+        childrenGroups = new ArrayList<>(1);
+        childrenGroups.add(new Group(Range.atLeast(0)));
     }
 
     protected FeatureTree(FeatureTree otherFeatureTree) {
         feature = otherFeatureTree.feature;
-        groupID = otherFeatureTree.groupID;
-        featureRange = otherFeatureTree.featureRange.clone();
-        groups = new ArrayList<>(otherFeatureTree.groups.size());
-        otherFeatureTree.groups.stream().map(Group::clone).forEach(groups::add);
+        parentGroupID = otherFeatureTree.parentGroupID;
+        cardinality = otherFeatureTree.cardinality.clone();
+        otherFeatureTree.childrenGroups.stream().map(Group::clone).forEach(childrenGroups::add);
         attributeValues = otherFeatureTree.cloneAttributes();
     }
 
@@ -133,34 +145,30 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     }
 
     @Override
-    public Group getGroup() {
-        return parent == null ? new Group(Range.of(0, 1)) : parent.getGroups().get(groupID);
+    public int getParentGroupID() {
+        return parentGroupID;
     }
 
     @Override
-    public int getGroupID() {
-        return groupID;
+    public Optional<Group> getParentGroup() {
+        return parent == null ? Optional.empty() : parent.getChildrenGroup(parentGroupID);
     }
 
     @Override
-    public List<IFeatureTree> getGroupSiblings() {
-        return parent.getChildren().stream()
-                .filter(t -> t.getGroupID() == groupID)
+    public List<Group> getChildrenGroups() {
+        return Collections.unmodifiableList(childrenGroups);
+    }
+
+    @Override
+    public Optional<Group> getChildrenGroup(int groupID) {
+        return Optional.ofNullable(getChildrenGroups().get(groupID));
+    }
+
+    @Override
+    public List<IFeatureTree> getChildren(int groupID) {
+        return getChildren().stream()
+                .filter(c -> c.getParentGroupID() == groupID)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<IFeatureTree> getGroupChildren(int groupID) {
-        return getChildren().stream().filter(t -> t.getGroupID() == groupID).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Group> getGroups() {
-        return Collections.unmodifiableList(groups);
-    }
-
-    public void setGroupCount(int count) {
-        groups = new ArrayList<>(count);
     }
 
     @Override
@@ -179,13 +187,13 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
     }
 
     @Override
-    public int getFeatureRangeLowerBound() {
-        return featureRange.getLowerBound();
+    public int getFeatureCardinalityLowerBound() {
+        return cardinality.getLowerBound();
     }
 
     @Override
-    public int getFeatureRangeUpperBound() {
-        return featureRange.getUpperBound();
+    public int getFeatureCardinalityUpperBound() {
+        return cardinality.getUpperBound();
     }
 
     @Override
@@ -198,69 +206,54 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
         if (this == other) return true;
         if (other == null || getClass() != other.getClass()) return false;
         FeatureTree otherFeatureTree = (FeatureTree) other;
-        return groupID == otherFeatureTree.groupID
+        return parentGroupID == otherFeatureTree.parentGroupID
                 && Objects.equals(feature, otherFeatureTree.feature)
-                && Objects.equals(groups, otherFeatureTree.groups);
+                && Objects.equals(childrenGroups, otherFeatureTree.childrenGroups);
     }
 
     @Override
     public int hashCodeNode() {
-        return Objects.hash(feature, groupID, groups);
+        return Objects.hash(feature, parentGroupID, childrenGroups);
     }
 
     @Override
-    public void setFeature(IFeature feature) {
-        this.feature = feature;
+    public int addCardinalityGroup(int lowerBound, int upperBound) {
+        childrenGroups.add(new Group(lowerBound, upperBound));
+        return childrenGroups.size() - 1;
     }
 
     @Override
-    public void addGroup(int lowerBound, int upperBound) {
-        groups.add(new Group(lowerBound, upperBound));
+    public int addCardinalityGroup(Range groupRange) {
+        childrenGroups.add(new Group(groupRange));
+        return childrenGroups.size() - 1;
     }
 
-    @Override
-    public void addGroup(Range groupRange) {
-        groups.add(new Group(groupRange));
-    }
-
-    @Override
-    public void setGroups(List<Group> groups) {
-        this.groups.clear();
-        this.groups.addAll(groups);
-    }
-
-    @Override
-    public void setGroupID(int groupID) {
+    public void setParentGroupID(int groupID) {
         if (parent == null) throw new IllegalArgumentException("Cannot set groupID for root feature!");
         if (groupID < 0) throw new IllegalArgumentException(String.format("groupID must be positive (%d)", groupID));
-        if (groupID >= parent.getGroups().size())
+        if (groupID >= parent.getChildrenGroups().size())
             throw new IllegalArgumentException(
                     String.format("groupID must be smaller than number of groups in parent feature (%d)", groupID));
-        this.groupID = groupID;
+        this.parentGroupID = groupID;
     }
 
     @Override
-    public void setGroupRange(Range groupRange) {
-        getGroup().groupRange = Range.copy(groupRange);
+    public void setFeatureCardinality(Range featureCardinality) {
+        this.cardinality = Range.copy(featureCardinality);
     }
 
     @Override
-    public void setFeatureRange(Range featureRange) {
-        this.featureRange = Range.copy(featureRange);
-    }
-
-    @Override
-    public void setMandatory() {
-        if (featureRange.getUpperBound() == 0) {
-            featureRange = Range.exactly(1);
+    public void makeMandatory() {
+        if (cardinality.getUpperBound() == 0) {
+            cardinality = Range.exactly(1);
         } else {
-            featureRange.setLowerBound(1);
+            cardinality.setLowerBound(1);
         }
     }
 
     @Override
-    public void setOptional() {
-        featureRange.setLowerBound(0);
+    public void makeOptional() {
+        cardinality.setLowerBound(0);
     }
 
     @Override
@@ -284,5 +277,13 @@ public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFe
             attributeValues = new LinkedHashMap<>();
         }
         return (S) attributeValues.remove(attribute);
+    }
+
+    @Override
+    public void toCardinalityGroup(int groupID, int lowerBound, int upperBound) {
+        Group group = getChildrenGroups().get(groupID);
+        if (group != null) {
+            group.setBounds(lowerBound, upperBound);
+        }
     }
 }

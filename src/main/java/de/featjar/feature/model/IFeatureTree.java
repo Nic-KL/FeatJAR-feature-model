@@ -30,34 +30,62 @@ import de.featjar.base.tree.structure.IRootedTree;
 import de.featjar.feature.model.FeatureTree.Group;
 import de.featjar.feature.model.mixins.IHasFeatureTree;
 
+import java.util.List;
+import java.util.Optional;
+
+
 /**
  * An ordered {@link ARootedTree} labeled with {@link Feature features}.
- * Implements some concepts from feature-oriented domain analysis, such as mandatory/optional features and groups.
+ * Implements some concepts from feature-oriented domain analysis, such as
+ * mandatory/optional features and groups.
  *
  * @author Elias Kuiter
+ * @author Sebastian Krieter
  */
 public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, IHasFeatureTree {
 
     IFeature getFeature();
 
-    List<Group> getGroups();
+    /**
+     * {@return the groups of this feature's children.}
+     * This list may contain {@code null}.
+     */
+    List<Group> getChildrenGroups();
 
-    Group getGroup();
+    /**
+     * {@return the group of this feature's children with the given id.}
+     * @param groupID the groupID
+     */
+    Optional<Group> getChildrenGroup(int groupID);
 
-    List<IFeatureTree> getGroupSiblings();
+    /**
+     * {@return all children within the group with the given id.}
+     * @param groupID the groupID
+     */
+    List<IFeatureTree> getChildren(int groupID);
 
-    List<IFeatureTree> getGroupChildren(int groupID);
+    /**
+     * {@return the group of this feature. (The group of this feature's parent, in which this feature is contained.)}
+     * @see #getParentGroupID()
+     */
+    Optional<Group> getParentGroup();
 
-    int getFeatureRangeLowerBound();
+    /**
+     * {@return the id of the group of this feature.}
+     * @see #getParentGroup()
+     */
+    int getParentGroupID();
 
-    int getFeatureRangeUpperBound();
+    int getFeatureCardinalityLowerBound();
+
+    int getFeatureCardinalityUpperBound();
 
     default boolean isMandatory() {
-        return getFeatureRangeLowerBound() > 0;
+        return getFeatureCardinalityLowerBound() > 0;
     }
 
     default boolean isOptional() {
-        return getFeatureRangeLowerBound() <= 0;
+        return getFeatureCardinalityLowerBound() <= 0;
     }
 
     default IMutableFeatureTree mutate() {
@@ -77,7 +105,7 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
         default IFeatureTree addFeatureBelow(IFeature newFeature, int index, int groupID) {
             FeatureTree newTree = new FeatureTree(newFeature);
             addChild(index, newTree);
-            newTree.setGroupID(groupID);
+            newTree.setParentGroupID(groupID);
             return newTree;
         }
 
@@ -86,10 +114,9 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
             Result<IFeatureTree> parent = getParent();
             if (parent.isPresent()) {
                 parent.get().replaceChild(this, newTree);
-                newTree.setGroupID(this.getGroupID());
             }
             newTree.addChild(this);
-            this.setGroupID(0);
+            setParentGroupID(0);
             return newTree;
         }
 
@@ -98,48 +125,135 @@ public interface IFeatureTree extends IRootedTree<IFeatureTree>, IAttributable, 
             if (parent.isPresent()) {
                 int childIndex = parent.get().getChildIndex(this).orElseThrow();
                 parent.get().removeChild(this);
-                int groupID = parent.get().getGroups().size();
                 // TODO improve group handling, probably needs slicing
-                for (Group group : getGroups()) {
-                    parent.get().mutate().addGroup(group.getLowerBound(), group.getUpperBound());
+                for (Group group : getChildrenGroups()) {
+                    parent.get().mutate().addCardinalityGroup(group.getLowerBound(), group.getUpperBound());
                 }
                 for (IFeatureTree child : getChildren()) {
                     parent.get().mutate().addChild(childIndex++, child);
-                    child.mutate().setGroupID(groupID + child.getGroupID());
                 }
             }
         }
 
-        void setFeatureRange(Range featureRange);
+        void setParentGroupID(int groupID);
 
-        void setFeature(IFeature feature);
+        void setFeatureCardinality(Range featureRange);
 
-        void addGroup(int lowerBound, int upperBound);
+        void makeMandatory();
 
-        void addGroup(Range groupRange);
+        void makeOptional();
 
-        void setGroups(List<Group> groups);
+        int addCardinalityGroup(int lowerBound, int upperBound);
 
-        void setGroupID(int groupID);
-
-        void setMandatory();
-
-        void setOptional();
-
-        void setGroupRange(Range groupRange);
-
-        default void setAnd() {
-            setGroupRange(Range.atLeast(0));
+        default int addCardinalityGroup(Range groupRange) {
+            return addCardinalityGroup(groupRange.getLowerBound(), groupRange.getUpperBound());
         }
 
-        default void setAlternative() {
-            setGroupRange(Range.exactly(1));
+        default int addAndGroup() {
+            return addCardinalityGroup(0, Range.OPEN);
         }
 
-        default void setOr() {
-            setGroupRange(Range.atLeast(1));
+        default int addAlternativeGroup() {
+            return addCardinalityGroup(1, 1);
+        }
+
+        default int addOrGroup() {
+            return addCardinalityGroup(1, Range.OPEN);
+        }
+
+        /**
+         * Changes the cardinality of the children group with the given id.
+         *
+         * @param groupID          the id of the group to change
+         * @param lowerBound       the new lower bound
+         * @param upperBound       the new upper bound
+         */
+        void toCardinalityGroup(int groupID, int lowerBound, int upperBound);
+
+        /**
+         * Changes the cardinality of the children group with the given id.
+         *
+         * @param groupID          the id of the group to change
+         * @param groupCardinality the new cardinality
+         */
+        default void toCardinalityGroup(int groupID, Range groupCardinality) {
+            toCardinalityGroup(groupID, groupCardinality.getLowerBound(), groupCardinality.getUpperBound());
+        }
+
+        /**
+         * Change children group to and group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 0, Range.OPEN)}.
+         *
+         * @param groupID the id of the group to change
+         */
+        default void toAndGroup(int groupID) {
+            toCardinalityGroup(groupID, 0, Range.OPEN);
+        }
+
+        /**
+         * Change children group to or group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, Range.OPEN)}.
+         *
+         * @param groupID the id of the group to change
+         */
+        default void toOrGroup(int groupID) {
+            toCardinalityGroup(groupID, 1, Range.OPEN);
+        }
+
+        /**
+         * Change children group to alternative group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(groupID, 1, 1)}.
+         *
+         * @param groupID the id of the group to change
+         */
+        default void toAlternativeGroup(int groupID) {
+            toCardinalityGroup(groupID, 1, 1);
+        }
+
+        /**
+         * Changes the cardinality of the first children group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, groupCardinality)}.
+         *
+         * @param groupCardinality the new cardinality
+         */
+        default void toCardinalityGroup(Range groupCardinality) {
+            toCardinalityGroup(0, groupCardinality);
+        }
+
+        /**
+         * Change first children group to cardinality group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, lowerBound, upperBound)}.
+         *
+         * @param lowerBound       the new lower bound
+         * @param upperBound       the new upper bound
+         */
+        default void toCardinalityGroup(int lowerBound, int upperBound) {
+            toCardinalityGroup(0, lowerBound, upperBound);
+        }
+
+        /**
+         * Change first children group to and group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 0, Range.OPEN)}.
+         *
+         */
+        default void toAndGroup() {
+            toAndGroup(0);
+        }
+
+        /**
+         * Change first children group to alternative group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 1, Range.OPEN)}.
+         */
+        default void toAlternativeGroup() {
+            toAlternativeGroup(0);
+        }
+
+        /**
+         * Change first children group to or group.
+         * Equivalent to calling {@link #toCardinalityGroup(int, int, int) toCardinalityGroup(0, 1, 1)}.
+         */
+        default void toOrGroup() {
+            toOrGroup(0);
         }
     }
-
-    int getGroupID();
 }

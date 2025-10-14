@@ -53,10 +53,6 @@ public interface IFeatureModel extends IFeatureModelElement, IHasCommonAttribute
     // every plugin defines a feature model (uvl) that restricts what its extensions can and cannot do (replacing
     // extensions.xml)
 
-    /**
-     * {@return a deep clone of the feature model}
-     * Copies all {@link IFeatureTree feature trees}, {@link IFeature features}, {@link IConstraint constraints}, and {@link IAttribute attributes}.
-     */
     IFeatureModel clone();
 
     Collection<IFeature> getFeatures();

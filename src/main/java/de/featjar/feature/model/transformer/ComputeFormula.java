@@ -24,9 +24,9 @@ import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
 import de.featjar.feature.model.FeatureTree.Group;
-import de.featjar.feature.model.IConstraint;
 import de.featjar.feature.model.IFeature;
 import de.featjar.feature.model.IFeatureModel;
 import de.featjar.feature.model.IFeatureTree;
@@ -34,9 +34,11 @@ import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.IFormula;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.AtLeast;
+import de.featjar.formula.structure.connective.AtMost;
 import de.featjar.formula.structure.connective.Between;
 import de.featjar.formula.structure.connective.Choose;
 import de.featjar.formula.structure.connective.Implies;
+import de.featjar.formula.structure.connective.Or;
 import de.featjar.formula.structure.connective.Reference;
 import de.featjar.formula.structure.predicate.Literal;
 import de.featjar.formula.structure.term.value.Variable;
@@ -63,61 +65,90 @@ public class ComputeFormula extends AComputation<IFormula> {
     @Override
     public Result<IFormula> compute(List<Object> dependencyList, Progress progress) {
         IFeatureModel featureModel = FEATURE_MODEL.get(dependencyList);
-        HashSet<IFeatureModel> featureModels = new HashSet<>();
         ArrayList<IFormula> constraints = new ArrayList<>();
         HashSet<Variable> variables = new HashSet<>();
-        featureModel.getFeatureTreeStream().forEach(tree -> {
+        featureModel.getFeatureTreeStream().forEach(node -> {
             // TODO use better error value
-            IFeature feature = tree.getFeature();
+            IFeature feature = node.getFeature();
             String featureName = feature.getName().orElse("");
             Variable variable = new Variable(featureName, feature.getType());
             variables.add(variable);
 
             // TODO take featureRanges into Account
-            Result<IFeatureTree> potentialParentTree = tree.getParent();
+            Result<IFeatureTree> potentialParentTree = node.getParent();
+            Literal featureLiteral = Expressions.literal(featureName);
             if (potentialParentTree.isEmpty()) {
-                if (tree.isMandatory()) {
-                    constraints.add(Expressions.literal(featureName));
-                }
+                handleRoot(constraints, featureLiteral, node);
             } else {
-                IFeatureTree parentTree = potentialParentTree.get();
-                Literal literal = Expressions.literal(featureName);
-                Literal parentLiteral =
-                        Expressions.literal(parentTree.getFeature().getName().orElse(""));
-                constraints.add(new Implies(literal, parentLiteral));
-                for (Group group : parentTree.getGroups()) {
-                    if (!group.isAnd()) {
-                        List<IFormula> groupLiterals = new ArrayList<>();
-                        for (IFeatureTree childTree : parentTree.getChildren()) {
-                            if (childTree.getGroup() == group) {
-                                groupLiterals.add(Expressions.literal(
-                                        childTree.getFeature().getName().orElse("")));
-                            }
-                        }
-                        if (group.isOr()) {
-                            constraints.add(new Implies(parentLiteral, new AtLeast(1, groupLiterals)));
-                        } else if (group.isAlternative()) {
-                            constraints.add(new Implies(parentLiteral, new Choose(1, groupLiterals)));
-                        } else {
-                            constraints.add(new Implies(
-                                    parentLiteral,
-                                    new Between(group.getLowerBound(), group.getUpperBound(), groupLiterals)));
-                        }
-                    }
-                }
+                handleParent(constraints, featureLiteral, node);
             }
-            for (IFeatureTree child : tree.getChildren()) {
-                child.getGroup();
-            }
-            IFeatureModel featureModel2 = feature.getFeatureModel();
-            if (featureModels.add(featureModel)) {
-                featureModel2.getConstraints().stream()
-                        .map(IConstraint::getFormula)
-                        .forEach(constraints::add);
-            }
+            handleGroups(constraints, featureLiteral, node);
         });
         Reference reference = new Reference(new And(constraints));
         reference.setFreeVariables(variables);
         return Result.of(reference);
+    }
+
+    private void handleParent(ArrayList<IFormula> constraints, Literal featureLiteral, IFeatureTree node) {
+        constraints.add(new Implies(
+                featureLiteral,
+                Expressions.literal(
+                        node.getParent().get().getFeature().getName().orElse(""))));
+    }
+
+    private void handleRoot(ArrayList<IFormula> constraints, Literal featureLiteral, IFeatureTree node) {
+        if (node.isMandatory()) {
+            constraints.add(featureLiteral);
+        }
+    }
+
+    private void handleGroups(ArrayList<IFormula> constraints, Literal featureLiteral, IFeatureTree node) {
+        List<Group> childrenGroups = node.getChildrenGroups();
+        int groupCount = childrenGroups.size();
+        ArrayList<List<IFormula>> groupLiterals = new ArrayList<>(groupCount);
+        for (int i = 0; i < groupCount; i++) {
+            groupLiterals.add(null);
+        }
+        List<? extends IFeatureTree> children = node.getChildren();
+        for (IFeatureTree childNode : children) {
+            Literal childLiteral =
+                    Expressions.literal(childNode.getFeature().getName().orElse(""));
+
+            if (childNode.isMandatory()) {
+                constraints.add(new Implies(featureLiteral, childLiteral));
+            }
+
+            int groupID = childNode.getParentGroupID();
+            List<IFormula> list = groupLiterals.get(groupID);
+            if (list == null) {
+                groupLiterals.set(groupID, list = new ArrayList<>());
+            }
+            list.add(childLiteral);
+        }
+        for (int i = 0; i < groupCount; i++) {
+            Group group = childrenGroups.get(i);
+            if (group != null) {
+                if (group.isOr()) {
+                    constraints.add(new Implies(featureLiteral, new Or(groupLiterals.get(i))));
+                } else if (group.isAlternative()) {
+                    constraints.add(new Implies(featureLiteral, new Choose(1, groupLiterals.get(i))));
+                } else {
+                    int lowerBound = group.getLowerBound();
+                    int upperBound = group.getUpperBound();
+                    if (lowerBound > 0) {
+                        if (upperBound != Range.OPEN) {
+                            constraints.add(new Implies(
+                                    featureLiteral, new Between(lowerBound, upperBound, groupLiterals.get(i))));
+                        } else {
+                            constraints.add(new Implies(featureLiteral, new AtMost(upperBound, groupLiterals.get(i))));
+                        }
+                    } else {
+                        if (upperBound != Range.OPEN) {
+                            constraints.add(new Implies(featureLiteral, new AtLeast(lowerBound, groupLiterals.get(i))));
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -28,6 +28,7 @@ public class Feature extends AFeatureModelElement implements IMutableFeature {
 
     protected Feature(IFeatureModel featureModel) {
         super(featureModel);
+        type = Boolean.class;
     }
 
     protected Feature(Feature otherFeature) {
@@ -46,7 +47,7 @@ public class Feature extends AFeatureModelElement implements IMutableFeature {
 
     @Override
     public Feature clone(IFeatureModel newFeatureModel) {
-        return new Feature(this, newFeatureModel);
+        return new Feature(this);
     }
 
     @Override

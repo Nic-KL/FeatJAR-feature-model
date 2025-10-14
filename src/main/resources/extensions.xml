@@ -2,8 +2,9 @@
 <extensions>
     <point id="de.featjar.feature.model.io.FeatureModelFormats">
         <extension id="de.featjar.feature.model.io.xml.GraphVizFeatureModelFormat" />
-        <extension id="de.featjar.feature.model.io.xml.XMLFeatureModelFormat" /> 
     	<extension id="de.featjar.feature.model.StringFeatureModelIFormat" />
+        <extension id="de.featjar.feature.model.io.xml.XMLFeatureModelFormat" />
+        <extension id="de.featjar.feature.model.io.dimacs.DimacsFeatureModelFormat" />
     </point>
     <point id="de.featjar.base.shell.ShellCommands">
     	<extension id="de.featjar.feature.model.LoadFeatureModel" />
