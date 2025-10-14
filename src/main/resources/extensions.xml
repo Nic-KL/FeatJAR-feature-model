@@ -12,6 +12,6 @@
     	<extension id="de.featjar.feature.model.LoadSample" />
     	<extension id="de.featjar.feature.model.LoadSampleGroup" />
 		<extension id="de.featjar.feature.model.StoreShellCommand" />
-		<extension id="de.featjar.feature.model.LoadPathVarShellCommand" />
+		<extension id="de.featjar.feature.model.LoadPathShellCommand" />
     </point>       
 </extensions>
