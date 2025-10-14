@@ -10,9 +10,7 @@ import de.featjar.feature.model.io.FeatureModelFormats;
 public class LoadFeatureModel extends ALoadShellCommand {
 
 	@Override
-	public void execute(ShellSession session, List<String> cmdParams) {			
-		//TODO global abort, catch Exception		
-		
+	public void execute(ShellSession session, List<String> cmdParams) {					
 		parseArguments(session, cmdParams, FeatureModelFormats.getInstance());		
 	}		
     @Override

@@ -10,8 +10,6 @@ public class LoadSampleGroup extends ALoadShellCommand {
 	
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
-		//TODO global abort
-		
 		parseArguments(session, cmdParams, BooleanAssignmentGroupsFormats.getInstance());	
 	}	
     @Override

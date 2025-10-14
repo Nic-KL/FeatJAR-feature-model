@@ -10,8 +10,6 @@ public class LoadFormula extends ALoadShellCommand {
 	
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {		
-		//TODO global abort
-		
 		parseArguments(session, cmdParams, FormulaFormats.getInstance());
 	}	
     @Override
