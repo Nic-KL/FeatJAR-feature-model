@@ -7,10 +7,9 @@ import de.featjar.base.shell.ShellSession;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 
 public class LoadConfig extends ALoadShellCommand {
+	
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
-		// TODO global abort
-		
 		parseArguments(session, cmdParams, BooleanAssignmentGroupsFormats.getInstance());
 	}
 
