@@ -9,7 +9,7 @@ import java.util.Optional;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.shell.ShellSession;
 
-public class LoadPathShellCommand extends ALoadShellCommand {
+public class LoadPath extends ALoadShellCommand {
 
 	@Override
 	public void execute(ShellSession session, List<String> cmdParams) {
@@ -21,12 +21,12 @@ public class LoadPathShellCommand extends ALoadShellCommand {
 		if (file.exists()){
 			session.put(name, Paths.get(path), Path.class);
 		} else {
-			FeatJAR.log().error("%s is no valid path to a file", path);
+			FeatJAR.log().error("'%s' is no valid path to a file", path);
 		}
 	}
 	
     public Optional<String> getShortName() {
-        return Optional.of("Load Path");
+        return Optional.of("LoadPath");
     }
     
     public Optional<String> getDescription(){
