@@ -30,7 +30,7 @@ public class LoadPath extends ALoadShellCommand {
     }
     
     public Optional<String> getDescription(){
-    	return Optional.of("WIP");
+    	return Optional.of("<var> <path> - load just a path into the shell such that it can be used by non-shell commands");
     }
 
 	@Override

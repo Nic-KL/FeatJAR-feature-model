@@ -173,6 +173,6 @@ public class StoreShellCommand implements IShellCommand {
     }
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("stores seesion variables on your hard drive - <cmd> <varname> <format>");
+    	return Optional.of("<varname> <format> - save seesion variables on your hard drive");
     }
 }

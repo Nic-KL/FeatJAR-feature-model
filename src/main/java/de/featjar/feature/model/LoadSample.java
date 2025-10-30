@@ -18,7 +18,7 @@ public class LoadSample extends ALoadShellCommand {
     }
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("load a sample - <cmd> <name> <path>");
+    	return Optional.of("<name> <path> - load a sample");
     }
 	@Override
 	public Optional<String> getFormatName() {
