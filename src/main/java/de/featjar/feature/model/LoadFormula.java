@@ -18,7 +18,7 @@ public class LoadFormula extends ALoadShellCommand {
     }
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("load a formula - <cmd> <name> <path>");
+    	return Optional.of("<name> <path> - load a formula");
     }
 	@Override
 	public Optional<String> getFormatName() {

@@ -20,7 +20,7 @@ public class LoadConfig extends ALoadShellCommand {
 
 	@Override
 	public Optional<String> getDescription() {
-		return Optional.of("load a configuration - <cmd> <path>");
+		return Optional.of("<path> - load a configuration");
 	}
 
 	@Override
