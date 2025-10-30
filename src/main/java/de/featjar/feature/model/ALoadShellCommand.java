@@ -26,27 +26,27 @@ public abstract class ALoadShellCommand implements IShellCommand {
     
     public abstract Optional<String> getDefaultName();
     
-    public String setPath(List<String> cmdParams) {
+    protected String setPath(List<String> cmdParams) {
     	return cmdParams.size() > 1 ? cmdParams.get(1) : 
-        	Shell.readCommand("Enter a path to load a " + getFormatName().orElse("") + " or leave blank to abort").orElse("");
+        	Shell.readCommand("\nEnter a path to load a " + getFormatName().orElse("") + " or leave blank to abort:\n").orElse("");
     }
     
-    public String setVarName(ShellSession session, List<String> cmdParams) {
+    protected String setVarName(ShellSession session, List<String> cmdParams) {
     	return cmdParams.size() > 0 ? cmdParams.get(0) : 
-    		Shell.readCommand("choose a name for your " 
+    		Shell.readCommand("\nChoose a name for your " 
     		+ getFormatName().orElse("") 
     		+ " or enter for default (" 
     		+ getDefaultName().orElse("") + (session.getSize()+1) 
-    		+ ")")
+    		+ "):\n")
 			.orElse(getDefaultName().orElse("") + (session.getSize() + 1));
     }
     
-	public void removeSingleEntry(ShellSession session, String name) {
+    private void removeSingleEntry(ShellSession session, String name) {
 		session.remove(name).ifPresentOrElse(e ->  FeatJAR.log().message("Removing of " + e + " successful"),
-				() -> FeatJAR.log().error("Could not find a variable named " + name));
+				() -> FeatJAR.log().error("\nCould not find a variable named " + name));
 	}
 	
-	public Optional<String> resolveKeyDoubling(String key, ShellSession session) {
+	private Optional<String> resolveKeyDoubling(String key, ShellSession session) {
     	while(session.containsKey(key)) {    		
         	FeatJAR.log().message("This session already contains a Variable with that name: \n");
         	session.printVariable(key);    
@@ -71,7 +71,7 @@ public abstract class ALoadShellCommand implements IShellCommand {
     	if(key.isEmpty()) {
     		return;
     	}
-    	
+    
 		if(result.isPresent()) {			
 			if (FeatureModel.class.isAssignableFrom(result.get().getClass())) {       
 				session.put(key, (FeatureModel) result.get(), FeatureModel.class);
@@ -91,11 +91,11 @@ public abstract class ALoadShellCommand implements IShellCommand {
 			}
 			FeatJAR.log().message(key + " successfully loaded\n");		
 		} else {						
-			printformatedProblem(result, key);			
+			printFormatIssue(result, key);			
 		}
     }
     
-    private <T> void printformatedProblem(Result<T> result, String key) {
+    private <T> void printFormatIssue(Result<T> result, String key) {
 		String wrongFormat = "Possible formats:";
         String input = Problem.printProblems(result.getProblems());
         
@@ -109,21 +109,19 @@ public abstract class ALoadShellCommand implements IShellCommand {
             FeatJAR.log().error(message + "\n");
             FeatJAR.log().error(possibleFormats);
         } else {
-			FeatJAR.log().error("Could not load file %s for variable %s", result.getProblems().get(0).getMessage(), key);
+			FeatJAR.log().error("Could not load file '"+result.getProblems().get(0).getMessage()+"' for variable '"+key+"'");
 			FeatJAR.log().problems(result.getProblems(), Verbosity.DEBUG);
         }        
     }
     
-	public <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) {		
+    protected <T> void parseArguments(ShellSession session, List<String> cmdParams, AFormats<T> format) {		
 		String name = setVarName(session, cmdParams); 
 		String path = setPath(cmdParams);
-        
+		
         if(path.isBlank()) {
-        	// TODO add result / problems 
-        	FeatJAR.log().debug("No correct path for %s specified", getFormatName().orElse("")); 
+        	FeatJAR.log().debug("No correct path for '%s' specified", getFormatName().orElse("")); 
         	return;
         }
-        
         loadFormat(IO.load(
 				Paths.get(path), format), name, session);
 	}
