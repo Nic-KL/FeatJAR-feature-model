@@ -18,7 +18,7 @@ public class LoadSampleGroup extends ALoadShellCommand {
     }
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("<name> <path> - load a sample group");
+    	return Optional.of("<var> <path> - load a sample group");
     }
 	@Override
 	public Optional<String> getFormatName() {
