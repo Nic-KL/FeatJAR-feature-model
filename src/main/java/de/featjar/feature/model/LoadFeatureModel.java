@@ -19,7 +19,7 @@ public class LoadFeatureModel extends ALoadShellCommand {
     }
     @Override
     public Optional<String> getDescription(){
-    	return Optional.of("<name> <path> - load a feature model");
+    	return Optional.of("<var> <path> - load a feature model");
     }
 	@Override
 	public Optional<String> getFormatName() {
