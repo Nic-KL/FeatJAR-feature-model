@@ -20,15 +20,14 @@
  */
 package de.featjar.feature.model;
 
+import de.featjar.base.data.Attribute;
+import de.featjar.base.data.Sets;
+import de.featjar.base.data.identifier.IIdentifiable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import de.featjar.base.data.Attribute;
-import de.featjar.base.data.Sets;
-import de.featjar.base.data.identifier.IIdentifiable;
 
 /**
  * Defines useful {@link Attribute attributes} for {@link FeatureModel feature models},
