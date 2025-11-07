@@ -20,8 +20,6 @@
  */
 package de.featjar.feature.model;
 
-import java.util.List;
-
 import de.featjar.base.data.IAttributable;
 import de.featjar.base.data.Range;
 import de.featjar.base.data.Result;
@@ -29,10 +27,8 @@ import de.featjar.base.tree.structure.ARootedTree;
 import de.featjar.base.tree.structure.IRootedTree;
 import de.featjar.feature.model.FeatureTree.Group;
 import de.featjar.feature.model.mixins.IHasFeatureTree;
-
 import java.util.List;
 import java.util.Optional;
-
 
 /**
  * An ordered {@link ARootedTree} labeled with {@link Feature features}.

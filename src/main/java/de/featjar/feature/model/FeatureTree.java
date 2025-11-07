@@ -20,6 +20,12 @@
  */
 package de.featjar.feature.model;
 
+import de.featjar.base.data.Attribute;
+import de.featjar.base.data.IAttribute;
+import de.featjar.base.data.Range;
+import de.featjar.base.tree.structure.ARootedTree;
+import de.featjar.base.tree.structure.ITree;
+import de.featjar.feature.model.IFeatureTree.IMutableFeatureTree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,13 +34,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import de.featjar.base.data.Attribute;
-import de.featjar.base.data.IAttribute;
-import de.featjar.base.data.Range;
-import de.featjar.base.tree.structure.ARootedTree;
-import de.featjar.base.tree.structure.ITree;
-import de.featjar.feature.model.IFeatureTree.IMutableFeatureTree;
 
 public class FeatureTree extends ARootedTree<IFeatureTree> implements IMutableFeatureTree {
 

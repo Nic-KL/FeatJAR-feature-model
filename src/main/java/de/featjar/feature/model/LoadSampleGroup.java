@@ -4,7 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import de.featjar.base.shell.ShellSession;
+import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
+
+/**
+ * Loads a sample group {@link BooleanAssignmentGroups} into the shell.
+ * 
+ * @author Niclas Kleinert
+ */
 
 public class LoadSampleGroup extends ALoadShellCommand {
 	

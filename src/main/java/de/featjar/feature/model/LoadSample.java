@@ -4,7 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import de.featjar.base.shell.ShellSession;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
+
+/**
+ * Loads a sample list {@link BooleanAssignmentList} into the shell.
+ * 
+ * @author Niclas Kleinert
+ */
 
 public class LoadSample extends ALoadShellCommand {
 
