@@ -47,14 +47,14 @@ public abstract class ALoadShellCommand implements IShellCommand {
 
     /**
      *
-     * {@return the formats' name that is mainly used for prompts}
+     * {@return a format name that is used for prompts}
      */
-    public abstract Optional<String> getFormatName();
+    protected abstract Optional<String> getFormatName();
 
     /**
      * {@return the default format name}
      */
-    public abstract Optional<String> getDefaultName();
+    protected abstract Optional<String> getDefaultName();
 
     protected String setPath(List<String> cmdParams) {
         return cmdParams.size() > 1
@@ -75,12 +75,6 @@ public abstract class ALoadShellCommand implements IShellCommand {
                         .orElse(getDefaultName().orElse("") + (session.getSize() + 1));
     }
 
-    private void removeSingleEntry(ShellSession session, String name) {
-        session.remove(name)
-                .ifPresentOrElse(e -> FeatJAR.log().message("Removing of " + e + " successful"), () -> FeatJAR.log()
-                        .error("\nCould not find a variable named " + name));
-    }
-
     private Optional<String> resolveKeyDoubling(String key, ShellSession session) {
         while (session.containsKey(key)) {
             FeatJAR.log().message("This session already contains a Variable with that name: \n");
@@ -89,7 +83,9 @@ public abstract class ALoadShellCommand implements IShellCommand {
                     .orElse("")
                     .toLowerCase();
             if (Objects.equals("y", choice)) {
-                removeSingleEntry(session, choice);
+                session.remove(choice)
+                .ifPresentOrElse(e -> FeatJAR.log().message("Removing of " + e + " successful"), () -> FeatJAR.log()
+                        .error("\nCould not find a variable named " + choice));
                 break;
             } else if (Objects.equals("r", choice)) {
                 key = Shell.readCommand("Enter another vaiable name: ").orElse("");

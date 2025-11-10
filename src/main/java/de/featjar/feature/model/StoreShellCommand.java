@@ -27,6 +27,7 @@ import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.base.io.format.AFormats;
 import de.featjar.base.io.format.IFormat;
+import de.featjar.base.log.Log.Verbosity;
 import de.featjar.base.shell.IShellCommand;
 import de.featjar.base.shell.Shell;
 import de.featjar.base.shell.ShellSession;
@@ -67,28 +68,29 @@ public class StoreShellCommand implements IShellCommand {
      */
     private <T> void save(ShellSession session, List<String> cmdParams) {
 
-        String inputVar = setVariableName(cmdParams);
+        String variableName = setVariableName(cmdParams);
 
-        session.getElement(inputVar)
+        session.getElement(variableName)
                 .ifPresentOrElse(
                         element -> {
-                            Result<IFormat<T>> inputFormat = setFormat(session, inputVar, cmdParams);
+                            Result<IFormat<T>> inputFormat = setFormat(session, variableName, cmdParams);
                             inputFormat.ifPresent(f -> {
-                                final Path path = Paths.get("" + inputVar);
+                                final Path path = Paths.get("" + variableName);
                                 try {
                                     IO.save((T) element, path, f);
                                 } catch (IOException e) {
                                     FeatJAR.log().error(e);
+                                    return;
                                 }
-                                FeatJAR.log().message("Storing of " + inputVar + " Successful");
-                            });
+                                FeatJAR.log().message("Storing of " + variableName + " Successful");
+                            }).orElseLog(Verbosity.ERROR);
                         },
-                        () -> FeatJAR.log().error(inputVar + " is no vaild variable name"));
+                        () -> FeatJAR.log().error(variableName + " is not present in the saession"));
     }
 
-    private <T> Result<AFormats<T>> getElementType(ShellSession session, String inputVar) {
-        Class<T> elementType = (Class<T>) session.getType(inputVar).orElseThrow();
-        return getFormatType(session, inputVar, elementType);
+    private <T> Result<AFormats<T>> getElementType(ShellSession session, String variableName) {
+        Class<T> elementType = (Class<T>) session.getType(variableName).orElseThrow();
+        return getFormatType(session, variableName, elementType);
     }
 
     private <T> Result<AFormats<T>> getFormatType(ShellSession session, final String variable, Class<T> classType) {
@@ -126,10 +128,10 @@ public class StoreShellCommand implements IShellCommand {
         return new Problem(String.format(message, arguments), severity);
     }
 
-    private <T> Result<IFormat<T>> setFormat(ShellSession session, String inputVar, List<String> cmdParams) {
+    private <T> Result<IFormat<T>> setFormat(ShellSession session, String variableName, List<String> cmdParams) {
 
         AFormats<T> formatExtensionPoint =
-                (AFormats<T>) getElementType(session, inputVar).orElseThrow();
+                (AFormats<T>) getElementType(session, variableName).orElseThrow();
         List<IFormat<T>> possibleFormats = formatExtensionPoint.getExtensions().stream()
                 .filter(f -> f.supportsWrite())
                 .collect(Collectors.toList());
@@ -193,7 +195,7 @@ public class StoreShellCommand implements IShellCommand {
                 return Result.of(possibleFormats.get(i));
             }
         }
-        return Result.empty(addProblem(Severity.ERROR, "No format matched the name '%s'!", choice));
+        return Result.empty(addProblem(Severity.ERROR, "No format matched the choice '%s'!", choice));
     }
 
     @Override
