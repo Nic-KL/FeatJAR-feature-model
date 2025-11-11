@@ -70,31 +70,34 @@ public class StoreShellCommand implements IShellCommand {
 
         String variableName = setVariableName(cmdParams);
 
-        session.getElement(variableName)
-                .ifPresentOrElse(
-                        element -> {
-                            Result<IFormat<T>> inputFormat = setFormat(session, variableName, cmdParams);
-                            inputFormat.ifPresent(f -> {
+        session.get(variableName)
+                .ifPresent(element -> {
+                    Result<IFormat<T>> inputFormat = setFormat(session, variableName, cmdParams);
+                    inputFormat
+                            .ifPresent(format -> {
                                 final Path path = Paths.get("" + variableName);
                                 try {
-                                    IO.save((T) element, path, f);
+                                    IO.save((T) element, path, format);
                                 } catch (IOException e) {
                                     FeatJAR.log().error(e);
                                     return;
                                 }
                                 FeatJAR.log().message("Storing of " + variableName + " Successful");
-                            }).orElseLog(Verbosity.ERROR);
-                        },
-                        () -> FeatJAR.log().error(variableName + " is not present in the session"));
+                            })
+                            .orElseLog(Verbosity.ERROR);
+                })
+                .orElseLog(Verbosity.ERROR);
     }
 
-    private <T> Result<AFormats<T>> getElementType(ShellSession session, String variableName) {
-        Class<T> elementType = (Class<T>) session.getType(variableName).orElseThrow();
-        return getFormatType(session, variableName, elementType);
-    }
+    private <T> Result<AFormats<T>> getFormatType(ShellSession session, final String variableName) {
+        Result<Object> elementType = session.getType(variableName);
+        AFormats<T> format = null;
 
-    private <T> Result<AFormats<T>> getFormatType(ShellSession session, final String variable, Class<T> classType) {
-        AFormats<T> format;
+        if (elementType.isEmpty()) {
+            return Result.empty(elementType.getProblems());
+        }
+
+        Class<T> classType = (Class<T>) elementType.get();
         if (classType.isAssignableFrom(FeatureModel.class)) {
             format = (AFormats<T>) FeatureModelFormats.getInstance();
         } else if (classType.isAssignableFrom(IFormula.class)) {
@@ -106,7 +109,8 @@ public class StoreShellCommand implements IShellCommand {
         } else if (classType.isAssignableFrom(BooleanAssignmentGroups.class)) {
             format = (AFormats<T>) BooleanAssignmentGroupsFormats.getInstance();
         } else {
-            return Result.empty(addProblem(Severity.ERROR, "Could not find the variable %s or its format", variable));
+            return Result.empty(
+                    addProblem(Severity.ERROR, "Could not find the variable %s or its format", variableName));
         }
         return Result.of(format);
     }
@@ -130,8 +134,13 @@ public class StoreShellCommand implements IShellCommand {
 
     private <T> Result<IFormat<T>> setFormat(ShellSession session, String variableName, List<String> cmdParams) {
 
-        AFormats<T> formatExtensionPoint =
-                (AFormats<T>) getElementType(session, variableName).orElseThrow();
+        Result<AFormats<T>> formatType = getFormatType(session, variableName);
+
+        if (formatType.isEmpty()) {
+            return Result.empty(formatType.getProblems());
+        }
+
+        AFormats<T> formatExtensionPoint = formatType.get();
         List<IFormat<T>> possibleFormats = formatExtensionPoint.getExtensions().stream()
                 .filter(f -> f.supportsWrite())
                 .collect(Collectors.toList());

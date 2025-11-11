@@ -74,34 +74,36 @@ public abstract class ALoadShellCommand implements IShellCommand {
                         .orElse(getDefaultName().orElse("") + (session.getSize() + 1));
     }
 
-    private Optional<String> resolveKeyDoubling(String key, ShellSession session) {
+    private Result<String> resolveKeyDoubling(String key, ShellSession session) {
         while (session.containsKey(key)) {
-            FeatJAR.log().message("This session already contains a Variable with that name: \n");
+            FeatJAR.log().info("This session already contains a Variable with that name: \n");
             session.printVariable(key);
             String choice = Shell.readCommand("Overwrite " + key + " ? (y)es, (r)ename, (a)bort")
                     .orElse("")
                     .toLowerCase();
             if (Objects.equals("y", choice)) {
                 session.remove(choice)
-                .ifPresentOrElse(e -> FeatJAR.log().message("Removing of " + e + " successful"), () -> FeatJAR.log()
-                        .error("\nCould not find a variable named " + choice));
+                        .ifPresent(e -> FeatJAR.log().message("Removing of " + e + " successful"))
+                        .orElseLog(Verbosity.ERROR);
                 break;
             } else if (Objects.equals("r", choice)) {
                 key = Shell.readCommand("Enter another vaiable name: ").orElse("");
             } else if (Objects.equals("a", choice)) {
                 FeatJAR.log().message("Aborted\n");
-                return Optional.empty();
+                return Result.empty();
             }
         }
-        return Optional.of(key);
+        return Result.of(key);
     }
 
     private <T> void loadFormat(Result<T> result, String key, ShellSession session) {
 
-        key = resolveKeyDoubling(key, session).get();
+        Result<String> newKey = resolveKeyDoubling(key, session);
 
-        if (key.isEmpty()) {
+        if (newKey.isEmpty()) {
             return;
+        } else {
+            key = newKey.get();
         }
 
         if (result.isPresent()) {
