@@ -46,13 +46,12 @@ import java.util.Optional;
 public abstract class ALoadShellCommand implements IShellCommand {
 
     /**
-     *
      * {@return a format name that is used for prompts}
      */
     protected abstract Optional<String> getFormatName();
 
     /**
-     * {@return the default format name}
+     * {@return the default format name that is used for the auto naming}
      */
     protected abstract Optional<String> getDefaultName();
 

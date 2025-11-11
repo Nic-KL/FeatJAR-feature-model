@@ -85,7 +85,7 @@ public class StoreShellCommand implements IShellCommand {
                                 FeatJAR.log().message("Storing of " + variableName + " Successful");
                             }).orElseLog(Verbosity.ERROR);
                         },
-                        () -> FeatJAR.log().error(variableName + " is not present in the saession"));
+                        () -> FeatJAR.log().error(variableName + " is not present in the session"));
     }
 
     private <T> Result<AFormats<T>> getElementType(ShellSession session, String variableName) {
@@ -143,9 +143,9 @@ public class StoreShellCommand implements IShellCommand {
             return selectFormat(possibleFormats);
         } else {
             input = cmdParams.get(1);
-            String javaMull = input;
+            final String caputerdInput = input;
             List<IFormat<T>> formats = possibleFormats.stream()
-                    .filter(f -> f.getName().toLowerCase().startsWith(javaMull))
+                    .filter(f -> f.getName().toLowerCase().startsWith(caputerdInput))
                     .collect(Collectors.toList());
 
             if (formats.isEmpty()) {
@@ -205,6 +205,6 @@ public class StoreShellCommand implements IShellCommand {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("<var> <format> - save seesion variables on your hard drive");
+        return Optional.of("<var> <format> - save seesion variables on your cuurent working directory");
     }
 }
