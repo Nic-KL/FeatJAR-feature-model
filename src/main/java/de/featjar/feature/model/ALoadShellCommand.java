@@ -77,7 +77,7 @@ public abstract class ALoadShellCommand implements IShellCommand {
     private Result<String> resolveKeyDoubling(String key, ShellSession session) {
         while (session.containsKey(key)) {
             FeatJAR.log().info("This session already contains a Variable with that name: \n");
-            session.printVariable(key);
+            session.printSingleELement(key);
             String choice = Shell.readCommand("Overwrite " + key + " ? (y)es, (r)ename, (a)bort")
                     .orElse("")
                     .toLowerCase();
